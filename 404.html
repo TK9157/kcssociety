@@ -22,6 +22,11 @@
             justify-content: center;
             align-items: center;
             text-align: center;
+            cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cfilter id='s' x='-20%25' y='-20%25' width='140%25' height='140%25'%3E%3CfeDropShadow dx='0' dy='1' stdDeviation='1' flood-color='%23000000' flood-opacity='0.4'/%3E%3C/filter%3E%3Cg filter='url(%23s)'%3E%3Ccircle cx='14' cy='7' r='4.5' fill='%23fb7185' stroke='%23ffffff' stroke-width='1.2'/%3E%3Ccircle cx='21' cy='12' r='4.5' fill='%23f43f5e' stroke='%23ffffff' stroke-width='1.2'/%3E%3Ccircle cx='18' cy='20' r='4.5' fill='%23fb7185' stroke='%23ffffff' stroke-width='1.2'/%3E%3Ccircle cx='10' cy='20' r='4.5' fill='%23f43f5e' stroke='%23ffffff' stroke-width='1.2'/%3E%3Ccircle cx='7' cy='12' r='4.5' fill='%23fb7185' stroke='%23ffffff' stroke-width='1.2'/%3E%3Ccircle cx='14' cy='14' r='4.5' fill='%23f59e0b' stroke='%23ffffff' stroke-width='1.2'/%3E%3Ccircle cx='14' cy='14' r='2' fill='%23fef08a'/%3E%3Ccircle cx='3' cy='3' r='2' fill='%23eab308' stroke='%23ffffff' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E") 3 3, auto;
+        }
+
+        a, button, .home-btn {
+            cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cfilter id='s2' x='-20%25' y='-20%25' width='140%25' height='140%25'%3E%3CfeDropShadow dx='0' dy='1.5' stdDeviation='1.5' flood-color='%23000000' flood-opacity='0.5'/%3E%3C/filter%3E%3Cg filter='url(%23s2)'%3E%3Ccircle cx='16' cy='8' r='5.5' fill='%23eab308' stroke='%23ffffff' stroke-width='1.5'/%3E%3Ccircle cx='24' cy='14' r='5.5' fill='%23f59e0b' stroke='%23ffffff' stroke-width='1.5'/%3E%3Ccircle cx='21' cy='23' r='5.5' fill='%23eab308' stroke='%23ffffff' stroke-width='1.5'/%3E%3Ccircle cx='11' cy='23' r='5.5' fill='%23f59e0b' stroke='%23ffffff' stroke-width='1.5'/%3E%3Ccircle cx='8' cy='14' r='5.5' fill='%23eab308' stroke='%23ffffff' stroke-width='1.5'/%3E%3Ccircle cx='16' cy='16' r='5.5' fill='%23b45309' stroke='%23ffffff' stroke-width='1.5'/%3E%3Ccircle cx='16' cy='16' r='2.5' fill='%23ffffff'/%3E%3Ccircle cx='3' cy='3' r='2.5' fill='%23f43f5e' stroke='%23ffffff' stroke-width='1.2'/%3E%3C/g%3E%3C/svg%3E") 3 3, pointer !important;
         }
 
         #canvas-container {
@@ -263,6 +268,91 @@
 
         init();
         animate();
+
+        /* Interactive Flower Cursor Trail & Click Burst */
+        (function initFlowerCursor() {
+            if (window.matchMedia('(hover: none)').matches) return;
+
+            const cursorTrail = document.createElement('div');
+            cursorTrail.id = 'flowerCursorTrail';
+            cursorTrail.style.position = 'fixed';
+            cursorTrail.style.top = '0';
+            cursorTrail.style.left = '0';
+            cursorTrail.style.width = '100%';
+            cursorTrail.style.height = '100%';
+            cursorTrail.style.pointerEvents = 'none';
+            cursorTrail.style.zIndex = '999998';
+            cursorTrail.style.overflow = 'hidden';
+            document.body.appendChild(cursorTrail);
+
+            const trailFlowers = ['🌸', '🌼', '🌺', '💮', '✨', '🏵️'];
+            const trailColors = ['#f43f5e', '#fbbf24', '#f59e0b', '#ec4899', '#ffffff', '#eab308'];
+            let lastTime = 0;
+            let lastX = 0;
+            let lastY = 0;
+
+            function spawnPetal(x, y, isClick) {
+                const petal = document.createElement('span');
+                const size = isClick ? (14 + Math.random() * 10) : (10 + Math.random() * 8);
+                const useSvg = Math.random() > 0.45;
+
+                if (useSvg) {
+                    const col = trailColors[Math.floor(Math.random() * trailColors.length)];
+                    petal.innerHTML = `<svg viewBox="0 0 24 24" width="${size}" height="${size}" style="fill:${col};filter:drop-shadow(0 1px 2px rgba(0,0,0,0.2));"><path d="M12 2C9.5 2 7 6.5 7 12s2.5 10 5 10 5-4.5 5-10-2.5-10-5-10z"/></svg>`;
+                } else {
+                    petal.textContent = trailFlowers[Math.floor(Math.random() * trailFlowers.length)];
+                    petal.style.fontSize = size + 'px';
+                }
+
+                petal.style.position = 'absolute';
+                petal.style.left = x + 'px';
+                petal.style.top = y + 'px';
+                petal.style.pointerEvents = 'none';
+                petal.style.userSelect = 'none';
+                petal.style.lineHeight = '1';
+                cursorTrail.appendChild(petal);
+
+                const driftX = (Math.random() - 0.5) * (isClick ? 50 : 25);
+                const driftY = (isClick ? (Math.random() - 0.5) * 50 : 20 + Math.random() * 30);
+                const rotate = (Math.random() - 0.5) * 360;
+
+                petal.animate([
+                    {
+                        transform: 'translate(-50%, -50%) scale(1) rotate(0deg)',
+                        opacity: isClick ? 1 : 0.85
+                    },
+                    {
+                        transform: `translate(calc(-50% + ${driftX}px), calc(-50% + ${driftY}px)) scale(0.25) rotate(${rotate}deg)`,
+                        opacity: 0
+                    }
+                ], {
+                    duration: isClick ? 750 : 600,
+                    easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                    fill: 'forwards'
+                });
+
+                setTimeout(() => {
+                    petal.remove();
+                }, isClick ? 800 : 650);
+            }
+
+            window.addEventListener('mousemove', function(e) {
+                const now = Date.now();
+                const dist = Math.hypot(e.clientX - lastX, e.clientY - lastY);
+                if (now - lastTime > 40 && dist > 10) {
+                    lastTime = now;
+                    lastX = e.clientX;
+                    lastY = e.clientY;
+                    spawnPetal(e.clientX, e.clientY, false);
+                }
+            }, { passive: true });
+
+            window.addEventListener('click', function(e) {
+                for (let i = 0; i < 5; i++) {
+                    spawnPetal(e.clientX, e.clientY, true);
+                }
+            }, { passive: true });
+        })();
     </script>
 </body>
 
