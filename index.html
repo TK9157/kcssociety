@@ -1797,25 +1797,23 @@ function hideMusicPrompt() {
   if (p) p.style.display = 'none';
 }
 
-function startBackgroundMusicAutoplay() {
-  var audio = getBgMusic();
-  if (!audio) return;
-  if (!bgMusicUnlocked && musicUserEnabled) { playBgMusic(); }
+function startBackgroundMusicOnInteraction() {
+  if (bgMusicUnlocked || !musicUserEnabled || musicYtPaused) return;
+  bgMusicUnlocked = true;
+  playBgMusic();
 }
 
 (function() {
-  var evts = ['click','touchstart','keydown','scroll'];
-  function unlock() {
-    if (bgMusicUnlocked || !musicUserEnabled) return;
-    startBackgroundMusicAutoplay();
-    evts.forEach(function(ev) { document.removeEventListener(ev, unlock); });
+  // Start music whenever user touches or clicks anywhere on the page
+  var evts = ['click', 'touchstart', 'touchend', 'pointerdown', 'keydown'];
+  function onUserTouch() {
+    if (bgMusicUnlocked) return;
+    evts.forEach(function(ev) { window.removeEventListener(ev, onUserTouch, true); });
+    startBackgroundMusicOnInteraction();
   }
-  evts.forEach(function(ev) { document.addEventListener(ev, unlock, {once:true, passive:true}); });
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() { setTimeout(startBackgroundMusicAutoplay, 500); });
-  } else {
-    setTimeout(startBackgroundMusicAutoplay, 500);
-  }
+  evts.forEach(function(ev) {
+    window.addEventListener(ev, onUserTouch, { capture: true, passive: true });
+  });
 })();
 // ===== End Background Music =====
 let mal = false;
