@@ -1559,7 +1559,7 @@ function updateMusicUI() {
   var emoji = document.getElementById('musicEmoji');
   if (!widget || !pill) return;
   var audio = getBgMusic();
-  var isPlaying = audio && !audio.paused;
+  var isPlaying = (audio && !audio.paused) || webAudioIsPlaying;
   widget.classList.remove('playing', 'paused', 'yt-playing');
   if (musicYtPaused) {
     widget.classList.add('yt-playing');
@@ -1579,6 +1579,111 @@ function updateMusicUI() {
   }
 }
 
+/* ===== Web Audio Carnatic Flute & Tanpura Synth (100% Non-Copyright) ===== */
+var webAudioCtx = null;
+var webAudioIsPlaying = false;
+var webAudioNodes = [];
+
+function startWebAudioSynth() {
+  if (webAudioIsPlaying) return;
+  try {
+    var AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    if (!webAudioCtx) webAudioCtx = new AudioCtx();
+    if (webAudioCtx.state === 'suspended') webAudioCtx.resume();
+
+    var masterGain = webAudioCtx.createGain();
+    masterGain.gain.setValueAtTime(0.24, webAudioCtx.currentTime);
+    masterGain.connect(webAudioCtx.destination);
+
+    // Tanpura Drone (Sa3, Pa3, Sa4)
+    [130.81, 196.00, 261.63].forEach(function(f) {
+      var osc = webAudioCtx.createOscillator();
+      var g = webAudioCtx.createGain();
+      var filter = webAudioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 750;
+
+      osc.type = 'sawtooth';
+      osc.frequency.value = f;
+      g.gain.value = 0.035;
+
+      osc.connect(filter);
+      filter.connect(g);
+      g.connect(masterGain);
+      osc.start();
+      webAudioNodes.push(osc);
+    });
+
+    // Flute Melody Loop in Raga Mohanam
+    var melody = [
+      { f: 261.63, d: 2.2 },
+      { f: 293.66, d: 1.6 },
+      { f: 329.63, d: 2.4 },
+      { f: 392.00, d: 2.0 },
+      { f: 329.63, d: 1.6 },
+      { f: 392.00, d: 2.2 },
+      { f: 440.00, d: 2.0 },
+      { f: 523.25, d: 3.2 },
+      { f: 440.00, d: 1.8 },
+      { f: 392.00, d: 2.2 },
+      { f: 329.63, d: 2.0 },
+      { f: 293.66, d: 2.2 },
+      { f: 261.63, d: 3.8 }
+    ];
+
+    var noteIdx = 0;
+    function playNextFluteNote() {
+      if (!webAudioIsPlaying || !webAudioCtx) return;
+      var note = melody[noteIdx % melody.length];
+      noteIdx++;
+
+      var now = webAudioCtx.currentTime;
+      var osc = webAudioCtx.createOscillator();
+      var gain = webAudioCtx.createGain();
+      var vib = webAudioCtx.createOscillator();
+      var vibGain = webAudioCtx.createGain();
+
+      vib.frequency.value = 5.2;
+      vibGain.gain.value = 4.2;
+      vib.connect(osc.frequency);
+
+      osc.type = 'sine';
+      osc.frequency.value = note.f;
+
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.exponentialRampToValueAtTime(0.20, now + 0.25);
+      gain.gain.setValueAtTime(0.20, now + note.d - 0.35);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + note.d);
+
+      osc.connect(gain);
+      gain.connect(masterGain);
+
+      vib.start(now);
+      osc.start(now);
+      vib.stop(now + note.d);
+      osc.stop(now + note.d);
+
+      var timerId = setTimeout(playNextFluteNote, note.d * 1000);
+      webAudioNodes.push({ stop: function() { clearTimeout(timerId); } });
+    }
+
+    webAudioIsPlaying = true;
+    playNextFluteNote();
+  } catch(e) {}
+}
+
+function stopWebAudioSynth() {
+  webAudioIsPlaying = false;
+  webAudioNodes.forEach(function(node) {
+    try {
+      if (node.stop) node.stop();
+      if (node.disconnect) node.disconnect();
+    } catch(e) {}
+  });
+  webAudioNodes = [];
+}
+
 function playBgMusic() {
   var audio = getBgMusic();
   if (!audio) return;
@@ -1587,24 +1692,53 @@ function playBgMusic() {
   if (p !== undefined) {
     p.then(function() {
       bgMusicUnlocked = true;
+      stopWebAudioSynth();
       updateMusicUI();
       hideMusicPrompt();
     }).catch(function(e) {
-      showMusicPrompt();
+      if (musicUserEnabled && bgMusicUnlocked) {
+        startWebAudioSynth();
+        updateMusicUI();
+        hideMusicPrompt();
+      } else {
+        showMusicPrompt();
+      }
     });
+  } else {
+    updateMusicUI();
   }
 }
 
 function pauseBgMusic() {
   var audio = getBgMusic();
   if (audio && !audio.paused) audio.pause();
+  stopWebAudioSynth();
   updateMusicUI();
 }
 
 function toggleBackgroundMusic() {
   if (musicYtPaused) return;
   musicUserEnabled = !musicUserEnabled;
-  if (musicUserEnabled) { playBgMusic(); } else { pauseBgMusic(); }
+  bgMusicUnlocked = true;
+  if (musicUserEnabled) {
+    var audio = getBgMusic();
+    audio.volume = 0.55;
+    var p = audio.play();
+    if (p !== undefined) {
+      p.then(function() {
+        stopWebAudioSynth();
+        updateMusicUI();
+      }).catch(function() {
+        startWebAudioSynth();
+        updateMusicUI();
+      });
+    } else {
+      startWebAudioSynth();
+      updateMusicUI();
+    }
+  } else {
+    pauseBgMusic();
+  }
   updateMusicUI();
 }
 
@@ -1775,8 +1909,9 @@ let mal = false;
     })();
   </script>
 
-  <!-- Background Music -->
+  <!-- Background Music (100% Royalty-Free & Non-Copyright) -->
   <audio id="bgMusic" loop preload="auto">
+    <source src="background_music.wav" type="audio/wav">
     <source src="background_music.mp3" type="audio/mpeg">
     <source src="background_music.mpeg" type="audio/mpeg">
   </audio>
