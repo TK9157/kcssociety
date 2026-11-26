@@ -5,6 +5,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="author" content="SAI INFOTECH">
+  <meta name="designer" content="SAI INFOTECH">
+  <meta name="publisher" content="SAI INFOTECH">
   <meta name="description"
     content="Official website of Kerala Chakkala Service Society, Thiruvananthapuram. Society activities, events, gallery and contact information.">
   <title>Grand Inauguration | Kerala Chakkala Service Society</title>
@@ -1355,6 +1358,54 @@
       box-shadow: 0 10px 25px rgba(220, 38, 38, 0.55);
     }
 
+    
+    .inauguration-credit-tag {
+      display: inline-block;
+      margin-top: 14px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid #eab308;
+      color: #fef08a;
+      padding: 6px 20px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), 0 0 15px rgba(234, 179, 8, 0.35);
+    }
+
+    .inauguration-credit-tag strong {
+      color: #fff;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .inauguration-footer-credit {
+      position: absolute;
+      bottom: 28px;
+      z-index: 10;
+      text-align: center;
+      color: #f8fafc;
+      font-size: 13px;
+      letter-spacing: 1px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(234, 179, 8, 0.45);
+      padding: 7px 22px;
+      border-radius: 999px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+
+    .inauguration-footer-credit strong {
+      color: #fde047;
+      font-weight: 800;
+    }
+
+    #inaugurationOverlay.opened .inauguration-footer-credit {
+      opacity: 0;
+    }
+
     /* ===== Automated Website Showcase HUD Bar ===== */
     #showcaseHUD {
       position: fixed;
@@ -1457,12 +1508,20 @@
       <div class="inauguration-vip-tag">
         <span>🎗️</span> Official Website Inauguration by Honourable MLA <span>🎗️</span>
       </div>
+      <div class="inauguration-credit-tag">
+        💻 Website Designed &amp; Developed by <strong>SAI INFOTECH</strong>
+      </div>
     </div>
 
     <!-- Horizontal Ceremonial Red Ribbon across screen -->
     <div class="ribbon-container">
       <div class="ribbon-half ribbon-left" onclick="triggerInauguration(); event.stopPropagation();"></div>
       <div class="ribbon-half ribbon-right" onclick="triggerInauguration(); event.stopPropagation();"></div>
+    </div>
+
+    <!-- Bottom Digital Partner Credit -->
+    <div class="inauguration-footer-credit">
+      Digital Technology Partner: <strong>SAI INFOTECH</strong>
     </div>
 
     <!-- Center Rosette / Golden Scissors Medallion -->
@@ -1477,7 +1536,7 @@
   <div id="showcaseHUD">
     <div class="showcase-indicator">
       <span class="showcase-live-dot"></span>
-      <span>WEBSITE SHOWCASE</span>
+      <span>WEBSITE SHOWCASE · SAI INFOTECH</span>
     </div>
     <div id="showcaseSectionTitle" class="showcase-section-title">KCS Society Banner</div>
     <button class="showcase-skip-btn" onclick="stopSiteShowcase(true)" title="Exit Showcase">✕ Skip</button>
@@ -1823,12 +1882,12 @@
         <div class="contact-item"><strong>Email</strong><br><a href="mailto:kcsstvm@gmail.com">kcsstvm@gmail.com</a>
         </div>
         <div class="contact-item"><strong>Address</strong><br>KN Mani Road, Kuriyathi, Manacaud, Trivandrum, Kerala, India - 695009</div>
+        <div class="contact-item"><strong>Digital Partner</strong><br>Website designed &amp; maintained by<br><strong>SAI INFOTECH</strong></div>
         <div class="contact-item"><strong>Registration</strong><br>Reg. No. 59/1968</div>
       </div>
     </section>
   </main>
-  <footer>ഐക്യം • സേവനം • കൂട്ടായ്മ<br>© <span id="year"></span> Sai Infotech<br><span class="site-credit">Website designed
-      &amp; maintained by SAI INFOTECH</span></footer>
+  <footer>ഐക്യം • സേവനം • കൂട്ടായ്മ<br>© <span id="year"></span> Sai Infotech · Kerala Chakkala Service Society<br><span class="site-credit">Website Designed &amp; Maintained by <strong>SAI INFOTECH</strong></span></footer>
   <div id="lightbox" onclick="closeLightbox()"><button aria-label="Close" onclick="closeLightbox()">×</button><img id="lightboxImg"
       alt="Expanded KCS Society photo"></div>
   <script>
@@ -2583,7 +2642,7 @@ function finishSiteShowcase() {
   var hud = document.getElementById('showcaseHUD');
   var titleEl = document.getElementById('showcaseSectionTitle');
   if (hud && titleEl) {
-    titleEl.textContent = '✨ Welcome to KCS Society ✨';
+    titleEl.textContent = '✨ Welcome to KCS Society · Powered by SAI INFOTECH ✨';
     hud.classList.add('active');
     triggerGrandCelebrationBurst();
     setTimeout(function() {
