@@ -1031,7 +1031,7 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      z-index: 9999999;
+      z-index: 99999999;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -1039,7 +1039,8 @@
       background: #000;
       user-select: none;
       font-family: inherit;
-      transition: opacity 0.8s ease 2.2s, visibility 0.8s ease 2.2s;
+      cursor: pointer;
+      transition: opacity 0.7s ease 2.1s, visibility 0.7s ease 2.1s;
     }
 
     #inaugurationOverlay.opened {
@@ -1059,6 +1060,7 @@
       transition: transform 2.2s cubic-bezier(0.77, 0, 0.175, 1);
       will-change: transform;
       box-shadow: 0 0 60px rgba(0, 0, 0, 0.95);
+      pointer-events: none;
     }
 
     .curtain-left {
@@ -1093,7 +1095,6 @@
       border-left: 3px solid #250003;
     }
 
-    /* Velvet depth & lighting overlay */
     .curtain-panel::before {
       content: "";
       position: absolute;
@@ -1134,6 +1135,7 @@
       justify-content: center;
       align-items: center;
       transition: transform 1.8s ease 0.3s, opacity 1.5s ease 0.5s;
+      pointer-events: none;
     }
 
     #inaugurationOverlay.opened .curtain-valance {
@@ -1141,7 +1143,6 @@
       opacity: 0;
     }
 
-    /* Golden Tassels on Valance */
     .valance-fringe {
       position: absolute;
       bottom: -14px;
@@ -1158,7 +1159,7 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
     }
 
-    /* Ceremonial Header inside overlay */
+    /* Dignitary / VIP Header (Clean - No Guide Text) */
     .inauguration-header {
       position: absolute;
       top: 110px;
@@ -1168,6 +1169,7 @@
       padding: 0 20px;
       transition: transform 1.2s ease, opacity 0.8s ease;
       max-width: 900px;
+      pointer-events: none;
     }
 
     #inaugurationOverlay.opened .inauguration-header {
@@ -1271,7 +1273,7 @@
       opacity: 0;
     }
 
-    /* Center Rosette / Inauguration Medallion (Clean - No Guide Text) */
+    /* Center Rosette / Golden Scissors Medallion */
     .inauguration-center {
       position: absolute;
       top: 55%;
@@ -1322,7 +1324,7 @@
     }
 
     .rosette-scissors {
-      font-size: 52px;
+      font-size: 54px;
       line-height: 1;
       filter: drop-shadow(0 2px 5px rgba(0,0,0,0.4));
     }
@@ -1437,7 +1439,7 @@
 <body class="curtain-locked">
 
   <!-- ===== Grand Inauguration Ribbon & Velvet Stage Curtain Overlay (Clean - No Guide Text) ===== -->
-  <div id="inaugurationOverlay" aria-label="Grand Inauguration Stage Curtain" onclick="handleInaugurationClick(event)">
+  <div id="inaugurationOverlay" aria-label="Grand Inauguration Stage Curtain" onclick="triggerInauguration()">
     <!-- Top Royal Pelmet / Valance -->
     <div class="curtain-valance">
       <div class="valance-fringe"></div>
@@ -1459,11 +1461,11 @@
 
     <!-- Horizontal Ceremonial Red Ribbon across screen -->
     <div class="ribbon-container">
-      <div class="ribbon-half ribbon-left"></div>
-      <div class="ribbon-half ribbon-right"></div>
+      <div class="ribbon-half ribbon-left" onclick="triggerInauguration(); event.stopPropagation();"></div>
+      <div class="ribbon-half ribbon-right" onclick="triggerInauguration(); event.stopPropagation();"></div>
     </div>
 
-    <!-- Center Rosette / Golden Scissors Medallion (Clean - No Text) -->
+    <!-- Center Rosette / Golden Scissors Medallion -->
     <div class="inauguration-center" onclick="triggerInauguration(); event.stopPropagation();">
       <div class="rosette-btn">
         <span class="rosette-scissors">✂️</span>
@@ -2408,23 +2410,25 @@ let mal = false;
   </div>
 
   <!-- YouTube IFrame API -->
-  <script src="https://www.youtube.com/iframe_api">
+  <script src="https://www.youtube.com/iframe_api"></script>
 
+<!-- Inauguration & Showcase Script -->
+<script>
 /* ===== Grand Inauguration Ceremony & Automated Website Showcase Tour ===== */
-let inaugurationOpened = false;
-let showcaseActive = false;
-let showcaseTimer = null;
-let showcaseAnimFrame = null;
+var inaugurationOpened = false;
+var showcaseActive = false;
+var showcaseTimer = null;
+var showcaseAnimFrame = null;
 
-const showcaseSteps = [
-  { id: 'hero', title: 'KCS Society Banner · സ്വാഗതം', duration: 3200 },
+var showcaseSteps = [
+  { id: 'home', title: 'KCS Society Banner · സ്വാഗതം', duration: 3400 },
+  { id: 'events', title: 'Event Highlights · കുടുംബസംഗമം 2026', duration: 4200, action: function() { if (typeof nextSlide === 'function') nextSlide(); } },
   { id: 'about', title: 'About Society · സൊസൈറ്റിയെക്കുറിച്ച്', duration: 3800 },
-  { id: 'events', title: 'Event Highlights · കുടുംബസംഗമം 2026', duration: 4200, action: () => { if (typeof nextSlide === 'function') nextSlide(); } },
   { id: 'committee', title: 'Office Bearers · ഭാരവാഹികൾ (A. Murugan & Team)', duration: 4800 },
   { id: 'gallery', title: 'Photo Gallery · ഫോട്ടോ ഗാലറി', duration: 3800 },
   { id: 'youtube', title: 'Official YouTube Channel', duration: 3800 },
   { id: 'contact', title: 'Contact Us · ബന്ധപ്പെടുക', duration: 3400 },
-  { top: 0, title: '✨ Welcome to KCS Society ✨', duration: 2400 }
+  { top: 0, title: '✨ Welcome to KCS Society ✨', duration: 2500 }
 ];
 
 function triggerInauguration() {
@@ -2432,32 +2436,65 @@ function triggerInauguration() {
   inaugurationOpened = true;
 
   document.body.classList.remove('curtain-locked');
-  window.scrollTo({ top: 0, behavior: 'instant' });
 
-  const overlay = document.getElementById('inaugurationOverlay');
-  const replayBtn = document.getElementById('replayInaugurationBtn');
-  
-  // 1. Play background music celebration immediately
-  if (typeof bgMusicUnlocked !== 'undefined' && !bgMusicUnlocked) {
-    bgMusicUnlocked = true;
-    if (typeof playBgMusic === 'function') {
-      playBgMusic();
-    }
-  }
-
-  // 2. Celebratory flower bursts and confetti
-  triggerGrandCelebrationBurst();
-
-  // 3. Open Curtains sideways and cut ribbon
+  var overlay = document.getElementById('inaugurationOverlay');
   if (overlay) {
     overlay.classList.add('opened');
   }
 
-  // 4. Start the Video Animation Showcase of the site!
-  startSiteShowcase();
+  // Direct element style overrides to guarantee opening
+  var curtainLeft = document.querySelector('.curtain-left');
+  var curtainRight = document.querySelector('.curtain-right');
+  var ribbonLeft = document.querySelector('.ribbon-left');
+  var ribbonRight = document.querySelector('.ribbon-right');
+  var valance = document.querySelector('.curtain-valance');
+  var header = document.querySelector('.inauguration-header');
+  var centerBtn = document.querySelector('.inauguration-center');
 
-  // 5. Show Replay button after reveal completes
-  setTimeout(() => {
+  if (curtainLeft) curtainLeft.style.transform = 'translateX(-100%)';
+  if (curtainRight) curtainRight.style.transform = 'translateX(100%)';
+  if (ribbonLeft) {
+    ribbonLeft.style.transform = 'translateX(-115%) rotate(-12deg)';
+    ribbonLeft.style.opacity = '0';
+  }
+  if (ribbonRight) {
+    ribbonRight.style.transform = 'translateX(115%) rotate(12deg)';
+    ribbonRight.style.opacity = '0';
+  }
+  if (valance) {
+    valance.style.transform = 'translateY(-100%)';
+    valance.style.opacity = '0';
+  }
+  if (header) {
+    header.style.transform = 'translateY(-80px) scale(0.9)';
+    header.style.opacity = '0';
+  }
+  if (centerBtn) {
+    centerBtn.style.transform = 'translate(-50%, -50%) scale(0.2) rotate(45deg)';
+    centerBtn.style.opacity = '0';
+  }
+
+  // Audio start
+  try {
+    if (typeof bgMusicUnlocked !== 'undefined') bgMusicUnlocked = true;
+    if (typeof playBgMusic === 'function') playBgMusic();
+    var audio = document.getElementById('bgMusic');
+    if (audio) audio.play().catch(function(){});
+  } catch(e) {}
+
+  // Celebration burst
+  try {
+    triggerGrandCelebrationBurst();
+  } catch(e) {}
+
+  // Automated website showcase
+  try {
+    startSiteShowcase();
+  } catch(e) {}
+
+  // Show replay button
+  setTimeout(function() {
+    var replayBtn = document.getElementById('replayInaugurationBtn');
     if (replayBtn) replayBtn.style.display = 'flex';
   }, 2600);
 }
@@ -2466,10 +2503,10 @@ function startSiteShowcase() {
   stopSiteShowcase(false);
   showcaseActive = true;
   
-  const hud = document.getElementById('showcaseHUD');
+  var hud = document.getElementById('showcaseHUD');
   if (hud) hud.classList.add('active');
 
-  let currentIdx = 0;
+  var currentIdx = 0;
 
   function runStep() {
     if (!showcaseActive || currentIdx >= showcaseSteps.length) {
@@ -2477,50 +2514,50 @@ function startSiteShowcase() {
       return;
     }
 
-    const step = showcaseSteps[currentIdx];
-    const titleEl = document.getElementById('showcaseSectionTitle');
+    var step = showcaseSteps[currentIdx];
+    var titleEl = document.getElementById('showcaseSectionTitle');
     if (titleEl) titleEl.textContent = step.title;
 
-    let targetY = 0;
+    var targetY = 0;
     if (step.id) {
-      const el = document.getElementById(step.id);
+      var el = document.getElementById(step.id);
       if (el) {
-        const navOffset = 65;
-        const rect = el.getBoundingClientRect();
+        var navOffset = 65;
+        var rect = el.getBoundingClientRect();
         targetY = rect.top + window.pageYOffset - navOffset;
       }
     } else if (typeof step.top !== 'undefined') {
       targetY = step.top;
     }
 
-    if (step.action) step.action();
+    if (step.action) {
+      try { step.action(); } catch(e) {}
+    }
 
-    // Smooth cinematic camera pan
-    smoothCameraPan(targetY, 1500, () => {
+    smoothCameraPan(targetY, 1500, function() {
       if (!showcaseActive) return;
-      showcaseTimer = setTimeout(() => {
+      showcaseTimer = setTimeout(function() {
         currentIdx++;
         runStep();
       }, step.duration - 1500);
     });
   }
 
-  // Delay step 1 until curtains have fully cleared screen
   showcaseTimer = setTimeout(runStep, 1200);
 }
 
 function smoothCameraPan(targetY, duration, callback) {
-  const startY = window.pageYOffset;
-  const distance = targetY - startY;
-  const startTime = performance.now();
+  var startY = window.pageYOffset;
+  var distance = targetY - startY;
+  var startTime = performance.now();
 
   function animate(currentTime) {
     if (!showcaseActive) return;
-    const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1);
+    var elapsed = currentTime - startTime;
+    var progress = Math.min(elapsed / duration, 1);
     
-    // Smooth cinematic easeInOutCubic
-    const ease = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+    // EaseInOutCubic
+    var ease = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
     window.scrollTo(0, startY + (distance * ease));
 
     if (progress < 1) {
@@ -2533,86 +2570,110 @@ function smoothCameraPan(targetY, duration, callback) {
   showcaseAnimFrame = requestAnimationFrame(animate);
 }
 
-function stopSiteShowcase(userInterrupted = true) {
+function stopSiteShowcase(userInterrupted) {
   showcaseActive = false;
   if (showcaseTimer) clearTimeout(showcaseTimer);
   if (showcaseAnimFrame) cancelAnimationFrame(showcaseAnimFrame);
-  const hud = document.getElementById('showcaseHUD');
+  var hud = document.getElementById('showcaseHUD');
   if (hud) hud.classList.remove('active');
 }
 
 function finishSiteShowcase() {
   stopSiteShowcase(false);
-  const hud = document.getElementById('showcaseHUD');
-  const titleEl = document.getElementById('showcaseSectionTitle');
+  var hud = document.getElementById('showcaseHUD');
+  var titleEl = document.getElementById('showcaseSectionTitle');
   if (hud && titleEl) {
     titleEl.textContent = '✨ Welcome to KCS Society ✨';
     hud.classList.add('active');
     triggerGrandCelebrationBurst();
-    setTimeout(() => {
+    setTimeout(function() {
       hud.classList.remove('active');
     }, 2800);
   }
 }
 
-// User can interrupt anytime by scrolling or touching
-window.addEventListener('wheel', () => { if (showcaseActive) stopSiteShowcase(true); }, { passive: true });
-window.addEventListener('touchmove', () => { if (showcaseActive) stopSiteShowcase(true); }, { passive: true });
+// User can interrupt showcase anytime by scrolling or touching
+window.addEventListener('wheel', function() { if (showcaseActive) stopSiteShowcase(true); }, { passive: true });
+window.addEventListener('touchmove', function() { if (showcaseActive) stopSiteShowcase(true); }, { passive: true });
 
 function resetInauguration() {
   stopSiteShowcase(false);
   inaugurationOpened = false;
   document.body.classList.add('curtain-locked');
-  window.scrollTo({ top: 0, behavior: 'instant' });
+  window.scrollTo(0, 0);
 
-  const overlay = document.getElementById('inaugurationOverlay');
-  const replayBtn = document.getElementById('replayInaugurationBtn');
+  var overlay = document.getElementById('inaugurationOverlay');
+  var replayBtn = document.getElementById('replayInaugurationBtn');
   if (overlay) {
     overlay.classList.remove('opened');
     overlay.style.display = 'flex';
     overlay.style.visibility = 'visible';
     overlay.style.opacity = '1';
   }
+  
+  var curtainLeft = document.querySelector('.curtain-left');
+  var curtainRight = document.querySelector('.curtain-right');
+  var ribbonLeft = document.querySelector('.ribbon-left');
+  var ribbonRight = document.querySelector('.ribbon-right');
+  var valance = document.querySelector('.curtain-valance');
+  var header = document.querySelector('.inauguration-header');
+  var centerBtn = document.querySelector('.inauguration-center');
+
+  if (curtainLeft) curtainLeft.style.transform = '';
+  if (curtainRight) curtainRight.style.transform = '';
+  if (ribbonLeft) { ribbonLeft.style.transform = ''; ribbonLeft.style.opacity = ''; }
+  if (ribbonRight) { ribbonRight.style.transform = ''; ribbonRight.style.opacity = ''; }
+  if (valance) { valance.style.transform = ''; valance.style.opacity = ''; }
+  if (header) { header.style.transform = ''; header.style.opacity = ''; }
+  if (centerBtn) { centerBtn.style.transform = ''; centerBtn.style.opacity = ''; }
+
   if (replayBtn) replayBtn.style.display = 'none';
 }
 
-function handleInaugurationClick(evt) {
-  triggerInauguration();
+// Global Key listener for Page Up (PgUp) and presentation remotes
+function handleInaugurationKey(e) {
+  if (inaugurationOpened) return;
+  var k = e.key || '';
+  var c = e.code || '';
+  var which = e.which || e.keyCode || 0;
+  
+  // Page Up (PgUp)
+  if (k === 'PageUp' || c === 'PageUp' || which === 33 || k === 'PgUp') {
+    e.preventDefault();
+    triggerInauguration();
+  }
+  // Secondary fallbacks for clickers: Enter or Space
+  else if (k === ' ' || c === 'Space' || which === 32 || k === 'Enter' || which === 13) {
+    e.preventDefault();
+    triggerInauguration();
+  }
 }
 
-// Global Key listener for Page Up (PgUp) and presentation remotes
-window.addEventListener('keydown', function(e) {
-  if (inaugurationOpened) return;
-  
-  // Page Up key (primary requirement from user)
-  if (e.key === 'PageUp' || e.code === 'PageUp' || e.keyCode === 33) {
-    e.preventDefault();
-    triggerInauguration();
-  }
-  // Secondary fallbacks for wireless clickers or spacebar
-  else if (e.key === 'Enter' || e.key === ' ' || e.code === 'Space') {
-    e.preventDefault();
-    triggerInauguration();
-  }
-});
+window.addEventListener('keydown', handleInaugurationKey, true);
+document.addEventListener('keydown', handleInaugurationKey, true);
 
-// Grand Celebration Burst (Celebratory Flower & Golden Confetti Showers)
+// Click or touch on overlay
+window.addEventListener('click', function(e) {
+  if (!inaugurationOpened && e.target.closest('#inaugurationOverlay')) {
+    triggerInauguration();
+  }
+}, true);
+
+// Grand Celebration Burst
 function triggerGrandCelebrationBurst() {
   if (typeof triggerFlowerBurst === 'function') {
-    // Initial blast from center
     triggerFlowerBurst(window.innerWidth / 2, window.innerHeight / 2);
-    // Left and right celebratory waves
-    setTimeout(() => {
+    setTimeout(function() {
       triggerFlowerBurst(window.innerWidth * 0.25, window.innerHeight * 0.4);
       triggerFlowerBurst(window.innerWidth * 0.75, window.innerHeight * 0.4);
     }, 450);
-    setTimeout(() => {
+    setTimeout(function() {
       triggerFlowerBurst(window.innerWidth * 0.5, window.innerHeight * 0.35);
     }, 950);
   }
 }
-
 </script>
+
 </body>
 
 </html>
