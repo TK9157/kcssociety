@@ -2084,6 +2084,17 @@ var bgMusicUnlocked = false;
 function getBgMusic() {
   if (!bgMusicEl) {
     bgMusicEl = document.getElementById('bgMusic');
+    if (bgMusicEl) {
+      bgMusicEl.addEventListener('error', function() {
+        if (bgMusicEl.src && bgMusicEl.src.indexOf('background_music.mp3') !== -1) {
+          bgMusicEl.src = 'music.mp3';
+          bgMusicEl.load();
+          if (bgMusicUnlocked && musicUserEnabled && !musicYtPaused) {
+            bgMusicEl.play().catch(function(){});
+          }
+        }
+      });
+    }
   }
   return bgMusicEl;
 }
@@ -2335,6 +2346,7 @@ let mal = false;
   <!-- Background Music -->
   <audio id="bgMusic" loop preload="auto" playsinline webkit-playsinline src="background_music.mp3">
     <source src="background_music.mp3" type="audio/mpeg">
+    <source src="music.mp3" type="audio/mpeg">
   </audio>
 
   <!-- Autoplay Prompt -->
