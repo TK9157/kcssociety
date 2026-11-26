@@ -1812,20 +1812,38 @@ function hideMusicPrompt() {
 
 function startBackgroundMusicOnInteraction() {
   if (bgMusicUnlocked || !musicUserEnabled || musicYtPaused) return;
-  bgMusicUnlocked = true;
   playBgMusic();
 }
 
 (function() {
-  // Start music whenever user touches or clicks anywhere on the page
-  var evts = ['click', 'touchstart', 'touchend', 'pointerdown', 'keydown'];
+  // Resilient user interaction unlocker - keeps listening until audio successfully plays
+  var evts = ['click', 'touchstart', 'pointerdown', 'keydown'];
   function onUserTouch() {
-    if (bgMusicUnlocked) return;
-    evts.forEach(function(ev) { window.removeEventListener(ev, onUserTouch, true); });
-    startBackgroundMusicOnInteraction();
+    var audio = getBgMusic();
+    if (!audio) return;
+    if (audio.paused && musicUserEnabled && !musicYtPaused) {
+      audio.volume = 0.65;
+      var p = audio.play();
+      if (p !== undefined) {
+        p.then(function() {
+          bgMusicUnlocked = true;
+          updateMusicUI();
+          hideMusicPrompt();
+          // Remove listeners only after confirmed successful playback
+          evts.forEach(function(ev) {
+            window.removeEventListener(ev, onUserTouch, true);
+            document.removeEventListener(ev, onUserTouch, true);
+          });
+        }).catch(function(err) {
+          // If browser temporarily blocked gesture, keep listeners active for next touch
+          console.warn('Audio unlock waiting for gesture:', err);
+        });
+      }
+    }
   }
   evts.forEach(function(ev) {
     window.addEventListener(ev, onUserTouch, { capture: true, passive: true });
+    document.addEventListener(ev, onUserTouch, { capture: true, passive: true });
   });
 })();
 // ===== End Background Music =====
@@ -1921,10 +1939,8 @@ let mal = false;
   </script>
 
   <!-- Background Music -->
-  <audio id="bgMusic" loop preload="auto">
+  <audio id="bgMusic" loop preload="auto" playsinline webkit-playsinline src="music.mp3">
     <source src="music.mp3" type="audio/mpeg">
-    <source src="background_music.mp3" type="audio/mpeg">
-    <source src="background_music.wav" type="audio/wav">
   </audio>
 
   <!-- Autoplay Prompt -->
