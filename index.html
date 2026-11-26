@@ -1554,6 +1554,7 @@
     startSlideshow();
     
 // ===== Background Music & YouTube Sync =====
+// ===== Clean Background Audio (music.mp3 / background_music.mp3) =====
 var bgMusicEl = null;
 var ytPlayer = null;
 var ytPlayerReady = false;
@@ -1562,7 +1563,9 @@ var musicYtPaused = false;
 var bgMusicUnlocked = false;
 
 function getBgMusic() {
-  if (!bgMusicEl) bgMusicEl = document.getElementById('bgMusic');
+  if (!bgMusicEl) {
+    bgMusicEl = document.getElementById('bgMusic');
+  }
   return bgMusicEl;
 }
 
@@ -1572,7 +1575,7 @@ function updateMusicUI() {
   var emoji = document.getElementById('musicEmoji');
   if (!widget || !pill) return;
   var audio = getBgMusic();
-  var isPlaying = (audio && !audio.paused) || webAudioIsPlaying;
+  var isPlaying = (audio && !audio.paused);
   widget.classList.remove('playing', 'paused', 'yt-playing');
   if (musicYtPaused) {
     widget.classList.add('yt-playing');
@@ -1581,142 +1584,30 @@ function updateMusicUI() {
     if (emoji) emoji.textContent = String.fromCodePoint(0x1F4FA);
   } else if (isPlaying) {
     widget.classList.add('playing');
-    pill.setAttribute('data-en', 'ON'); pill.setAttribute('data-ml', String.fromCodePoint(0x0D13, 0x0D7B));
-    pill.textContent = 'ON';
+    pill.setAttribute('data-en', 'ON'); pill.setAttribute('data-ml', 'ഓൺ');
+    pill.textContent = (typeof mal !== 'undefined' && mal) ? 'ഓൺ' : 'ON';
     if (emoji) emoji.textContent = String.fromCodePoint(0x1F3B5);
   } else {
     widget.classList.add('paused');
-    pill.setAttribute('data-en', 'OFF'); pill.setAttribute('data-ml', String.fromCodePoint(0x0D13, 0x0D2B, 0x0D4D));
-    pill.textContent = 'OFF';
-    if (emoji) emoji.textContent = String.fromCodePoint(0x1F3B5);
+    pill.setAttribute('data-en', 'OFF'); pill.setAttribute('data-ml', 'ഓഫ്');
+    pill.textContent = (typeof mal !== 'undefined' && mal) ? 'ഓഫ്' : 'OFF';
+    if (emoji) emoji.textContent = String.fromCodePoint(0x1F507);
   }
-}
-
-/* ===== Web Audio Carnatic Flute & Tanpura Synth (100% Non-Copyright) ===== */
-var webAudioCtx = null;
-var webAudioIsPlaying = false;
-var webAudioNodes = [];
-
-function startWebAudioSynth() {
-  if (webAudioIsPlaying) return;
-  try {
-    var AudioCtx = window.AudioContext || window.webkitAudioContext;
-    if (!AudioCtx) return;
-    if (!webAudioCtx) webAudioCtx = new AudioCtx();
-    if (webAudioCtx.state === 'suspended') webAudioCtx.resume();
-
-    var masterGain = webAudioCtx.createGain();
-    masterGain.gain.setValueAtTime(0.24, webAudioCtx.currentTime);
-    masterGain.connect(webAudioCtx.destination);
-
-    // Tanpura Drone (Sa3, Pa3, Sa4)
-    [130.81, 196.00, 261.63].forEach(function(f) {
-      var osc = webAudioCtx.createOscillator();
-      var g = webAudioCtx.createGain();
-      var filter = webAudioCtx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.value = 750;
-
-      osc.type = 'sawtooth';
-      osc.frequency.value = f;
-      g.gain.value = 0.035;
-
-      osc.connect(filter);
-      filter.connect(g);
-      g.connect(masterGain);
-      osc.start();
-      webAudioNodes.push(osc);
-    });
-
-    // Flute Melody Loop in Raga Mohanam
-    var melody = [
-      { f: 261.63, d: 2.2 },
-      { f: 293.66, d: 1.6 },
-      { f: 329.63, d: 2.4 },
-      { f: 392.00, d: 2.0 },
-      { f: 329.63, d: 1.6 },
-      { f: 392.00, d: 2.2 },
-      { f: 440.00, d: 2.0 },
-      { f: 523.25, d: 3.2 },
-      { f: 440.00, d: 1.8 },
-      { f: 392.00, d: 2.2 },
-      { f: 329.63, d: 2.0 },
-      { f: 293.66, d: 2.2 },
-      { f: 261.63, d: 3.8 }
-    ];
-
-    var noteIdx = 0;
-    function playNextFluteNote() {
-      if (!webAudioIsPlaying || !webAudioCtx) return;
-      var note = melody[noteIdx % melody.length];
-      noteIdx++;
-
-      var now = webAudioCtx.currentTime;
-      var osc = webAudioCtx.createOscillator();
-      var gain = webAudioCtx.createGain();
-      var vib = webAudioCtx.createOscillator();
-      var vibGain = webAudioCtx.createGain();
-
-      vib.frequency.value = 5.2;
-      vibGain.gain.value = 4.2;
-      vib.connect(osc.frequency);
-
-      osc.type = 'sine';
-      osc.frequency.value = note.f;
-
-      gain.gain.setValueAtTime(0.001, now);
-      gain.gain.exponentialRampToValueAtTime(0.20, now + 0.25);
-      gain.gain.setValueAtTime(0.20, now + note.d - 0.35);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + note.d);
-
-      osc.connect(gain);
-      gain.connect(masterGain);
-
-      vib.start(now);
-      osc.start(now);
-      vib.stop(now + note.d);
-      osc.stop(now + note.d);
-
-      var timerId = setTimeout(playNextFluteNote, note.d * 1000);
-      webAudioNodes.push({ stop: function() { clearTimeout(timerId); } });
-    }
-
-    webAudioIsPlaying = true;
-    playNextFluteNote();
-  } catch(e) {}
-}
-
-function stopWebAudioSynth() {
-  webAudioIsPlaying = false;
-  webAudioNodes.forEach(function(node) {
-    try {
-      if (node.stop) node.stop();
-      if (node.disconnect) node.disconnect();
-    } catch(e) {}
-  });
-  webAudioNodes = [];
 }
 
 function playBgMusic() {
   var audio = getBgMusic();
   if (!audio) return;
-  if (!audio.src) audio.src = 'background_music.mp3';
   audio.volume = 0.65;
   var p = audio.play();
   if (p !== undefined) {
     p.then(function() {
       bgMusicUnlocked = true;
-      stopWebAudioSynth();
       updateMusicUI();
       hideMusicPrompt();
     }).catch(function(e) {
-      console.warn('Audio element play error, starting synth fallback:', e);
-      if (musicUserEnabled) {
-        bgMusicUnlocked = true;
-        startWebAudioSynth();
-        updateMusicUI();
-        hideMusicPrompt();
-      }
+      console.warn('Audio play error:', e);
+      showMusicPrompt();
     });
   } else {
     updateMusicUI();
@@ -1726,7 +1617,6 @@ function playBgMusic() {
 function pauseBgMusic() {
   var audio = getBgMusic();
   if (audio && !audio.paused) audio.pause();
-  stopWebAudioSynth();
   updateMusicUI();
 }
 
@@ -1735,21 +1625,7 @@ function toggleBackgroundMusic() {
   musicUserEnabled = !musicUserEnabled;
   bgMusicUnlocked = true;
   if (musicUserEnabled) {
-    var audio = getBgMusic();
-    audio.volume = 0.55;
-    var p = audio.play();
-    if (p !== undefined) {
-      p.then(function() {
-        stopWebAudioSynth();
-        updateMusicUI();
-      }).catch(function() {
-        startWebAudioSynth();
-        updateMusicUI();
-      });
-    } else {
-      startWebAudioSynth();
-      updateMusicUI();
-    }
+    playBgMusic();
   } else {
     pauseBgMusic();
   }
@@ -1813,12 +1689,11 @@ function hideMusicPrompt() {
 
 function startBackgroundMusicOnInteraction() {
   if (bgMusicUnlocked || !musicUserEnabled || musicYtPaused) return;
-  bgMusicUnlocked = true;
   playBgMusic();
 }
 
 (function() {
-  // Resilient user interaction unlocker - keeps listening until audio successfully plays
+  // Listen for user interaction to start MP3 audio
   var evts = ['click', 'touchstart', 'pointerdown', 'keydown'];
   function onUserTouch() {
     var audio = getBgMusic();
@@ -1831,14 +1706,12 @@ function startBackgroundMusicOnInteraction() {
           bgMusicUnlocked = true;
           updateMusicUI();
           hideMusicPrompt();
-          // Remove listeners only after confirmed successful playback
           evts.forEach(function(ev) {
             window.removeEventListener(ev, onUserTouch, true);
             document.removeEventListener(ev, onUserTouch, true);
           });
         }).catch(function(err) {
-          // If browser temporarily blocked gesture, keep listeners active for next touch
-          console.warn('Audio unlock waiting for gesture:', err);
+          console.warn('Audio waiting for user gesture:', err);
         });
       }
     }
@@ -1941,10 +1814,9 @@ let mal = false;
   </script>
 
   <!-- Background Music -->
-  <audio id="bgMusic" loop preload="auto" playsinline webkit-playsinline src="background_music.mp3">
-    <source src="background_music.mp3" type="audio/mpeg">
+  <audio id="bgMusic" loop preload="auto" playsinline webkit-playsinline src="music.mp3">
     <source src="music.mp3" type="audio/mpeg">
-    <source src="background_music.wav" type="audio/wav">
+    <source src="background_music.mp3" type="audio/mpeg">
   </audio>
 
   <!-- Autoplay Prompt -->
