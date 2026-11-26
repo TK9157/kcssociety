@@ -1048,7 +1048,7 @@
       pointer-events: none;
     }
 
-    /* Curtain panels */
+    /* Velvet Curtain panels */
     .curtain-panel {
       position: absolute;
       top: 0;
@@ -1161,7 +1161,7 @@
     /* Ceremonial Header inside overlay */
     .inauguration-header {
       position: absolute;
-      top: 105px;
+      top: 110px;
       z-index: 10;
       text-align: center;
       color: #fff;
@@ -1271,7 +1271,7 @@
       opacity: 0;
     }
 
-    /* Center Rosette / Inauguration Medallion */
+    /* Center Rosette / Inauguration Medallion (Clean - No Guide Text) */
     .inauguration-center {
       position: absolute;
       top: 55%;
@@ -1293,19 +1293,15 @@
     }
 
     .rosette-btn {
-      width: 145px;
-      height: 145px;
+      width: 130px;
+      height: 130px;
       border-radius: 50%;
       background: radial-gradient(circle, #fef08a 0%, #eab308 55%, #854d0e 100%);
       border: 5px solid #fff;
       box-shadow: 0 0 0 6px #dc2626, 0 16px 45px rgba(0, 0, 0, 0.75), 0 0 50px rgba(234, 179, 8, 0.85);
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      color: #78350f;
-      text-align: center;
-      padding: 10px;
       cursor: pointer;
       animation: pulseGold 2s infinite ease-in-out;
       transition: transform 0.25s, box-shadow 0.25s;
@@ -1326,72 +1322,9 @@
     }
 
     .rosette-scissors {
-      font-size: 42px;
+      font-size: 52px;
       line-height: 1;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));
-    }
-
-    .rosette-text-ml {
-      font-size: 13px;
-      font-weight: 800;
-      color: #713f12;
-      margin-top: 3px;
-      letter-spacing: 0.5px;
-    }
-
-    .rosette-text-en {
-      font-size: 11px;
-      font-weight: 900;
-      color: #991b1b;
-      letter-spacing: 1px;
-    }
-
-    /* Prompt Card at the bottom */
-    .inauguration-prompt {
-      position: absolute;
-      bottom: 40px;
-      z-index: 10;
-      text-align: center;
-      color: #fff;
-      transition: transform 1s ease, opacity 0.6s ease;
-    }
-
-    #inaugurationOverlay.opened .inauguration-prompt {
-      transform: translateY(40px);
-      opacity: 0;
-    }
-
-    .key-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 2px solid #eab308;
-      padding: 14px 30px;
-      border-radius: 999px;
-      font-size: 16px;
-      font-weight: 600;
-      color: #f8fafc;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), 0 0 25px rgba(234, 179, 8, 0.45);
-      backdrop-filter: blur(8px);
-      cursor: pointer;
-    }
-
-    .key-badge {
-      background: linear-gradient(180deg, #fef08a 0%, #eab308 100%);
-      color: #713f12;
-      font-weight: 900;
-      padding: 5px 14px;
-      border-radius: 8px;
-      box-shadow: 0 3px 0 #854d0e, 0 4px 12px rgba(0, 0, 0, 0.4);
-      font-family: monospace;
-      font-size: 16px;
-      animation: keyBounce 1.8s infinite ease-in-out;
-    }
-
-    @keyframes keyBounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-4px); }
+      filter: drop-shadow(0 2px 5px rgba(0,0,0,0.4));
     }
 
     /* Floating Replay button on revealed website */
@@ -1420,12 +1353,90 @@
       box-shadow: 0 10px 25px rgba(220, 38, 38, 0.55);
     }
 
+    /* ===== Automated Website Showcase HUD Bar ===== */
+    #showcaseHUD {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      z-index: 999990;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(9, 43, 102, 0.94);
+      border: 2px solid #eab308;
+      padding: 10px 22px;
+      border-radius: 999px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(234, 179, 8, 0.4);
+      color: #fff;
+      font-family: inherit;
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+      pointer-events: auto;
+    }
+
+    #showcaseHUD.active {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .showcase-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      color: #fef08a;
+      letter-spacing: 0.5px;
+    }
+
+    .showcase-live-dot {
+      width: 10px;
+      height: 10px;
+      background: #ef4444;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #ef4444;
+      animation: pulseLiveDot 1.2s infinite ease-in-out;
+    }
+
+    @keyframes pulseLiveDot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.35); opacity: 0.6; }
+    }
+
+    .showcase-section-title {
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      border-left: 1px solid rgba(255, 255, 255, 0.35);
+      padding-left: 12px;
+    }
+
+    .showcase-skip-btn {
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .showcase-skip-btn:hover {
+      background: rgba(239, 68, 68, 0.85);
+      border-color: #ef4444;
+      transform: scale(1.05);
+    }
+
   </style>
 </head>
 
 <body class="curtain-locked">
 
-  <!-- ===== Grand Inauguration Ribbon & Velvet Stage Curtain Overlay ===== -->
+  <!-- ===== Grand Inauguration Ribbon & Velvet Stage Curtain Overlay (Clean - No Guide Text) ===== -->
   <div id="inaugurationOverlay" aria-label="Grand Inauguration Stage Curtain" onclick="handleInaugurationClick(event)">
     <!-- Top Royal Pelmet / Valance -->
     <div class="curtain-valance">
@@ -1452,25 +1463,22 @@
       <div class="ribbon-half ribbon-right"></div>
     </div>
 
-    <!-- Center Rosette / Golden Scissors Button -->
+    <!-- Center Rosette / Golden Scissors Medallion (Clean - No Text) -->
     <div class="inauguration-center" onclick="triggerInauguration(); event.stopPropagation();">
-      <div class="rosette-btn" title="Click or Press Page Up to Inaugurate">
+      <div class="rosette-btn">
         <span class="rosette-scissors">✂️</span>
-        <span class="rosette-text-ml">ഉദ്ഘാടനം</span>
-        <span class="rosette-text-en">INAUGURATE</span>
       </div>
     </div>
+  </div>
 
-    <!-- Instructions / Trigger Pill -->
-    <div class="inauguration-prompt">
-      <div class="key-pill" onclick="triggerInauguration(); event.stopPropagation();">
-        <span class="key-badge">Page Up</span>
-        <span>Press <strong>PgUp</strong> key or click to open website</span>
-      </div>
-      <div style="margin-top:10px;font-size:14px;color:#fef08a;text-shadow:0 1px 5px rgba(0,0,0,0.85);font-weight:bold;">
-        ഉദ്ഘാടനം ചെയ്യാനായി കീബോർഡിലെ <strong>[ PgUp ]</strong> കീ അമർത്തുക
-      </div>
+  <!-- Automated Website Showcase HUD Bar -->
+  <div id="showcaseHUD">
+    <div class="showcase-indicator">
+      <span class="showcase-live-dot"></span>
+      <span>WEBSITE SHOWCASE</span>
     </div>
+    <div id="showcaseSectionTitle" class="showcase-section-title">KCS Society Banner</div>
+    <button class="showcase-skip-btn" onclick="stopSiteShowcase(true)" title="Exit Showcase">✕ Skip</button>
   </div>
 
   <!-- Discreet Floating Replay Button once opened -->
@@ -2402,8 +2410,22 @@ let mal = false;
   <!-- YouTube IFrame API -->
   <script src="https://www.youtube.com/iframe_api">
 
-/* ===== Grand Inauguration Ceremony Logic ===== */
+/* ===== Grand Inauguration Ceremony & Automated Website Showcase Tour ===== */
 let inaugurationOpened = false;
+let showcaseActive = false;
+let showcaseTimer = null;
+let showcaseAnimFrame = null;
+
+const showcaseSteps = [
+  { id: 'hero', title: 'KCS Society Banner · സ്വാഗതം', duration: 3200 },
+  { id: 'about', title: 'About Society · സൊസൈറ്റിയെക്കുറിച്ച്', duration: 3800 },
+  { id: 'events', title: 'Event Highlights · കുടുംബസംഗമം 2026', duration: 4200, action: () => { if (typeof nextSlide === 'function') nextSlide(); } },
+  { id: 'committee', title: 'Office Bearers · ഭാരവാഹികൾ (A. Murugan & Team)', duration: 4800 },
+  { id: 'gallery', title: 'Photo Gallery · ഫോട്ടോ ഗാലറി', duration: 3800 },
+  { id: 'youtube', title: 'Official YouTube Channel', duration: 3800 },
+  { id: 'contact', title: 'Contact Us · ബന്ധപ്പെടുക', duration: 3400 },
+  { top: 0, title: '✨ Welcome to KCS Society ✨', duration: 2400 }
+];
 
 function triggerInauguration() {
   if (inaugurationOpened) return;
@@ -2415,7 +2437,7 @@ function triggerInauguration() {
   const overlay = document.getElementById('inaugurationOverlay');
   const replayBtn = document.getElementById('replayInaugurationBtn');
   
-  // 1. Play background audio celebration immediately
+  // 1. Play background music celebration immediately
   if (typeof bgMusicUnlocked !== 'undefined' && !bgMusicUnlocked) {
     bgMusicUnlocked = true;
     if (typeof playBgMusic === 'function') {
@@ -2431,13 +2453,114 @@ function triggerInauguration() {
     overlay.classList.add('opened');
   }
 
-  // 4. Show Replay button after reveal completes
+  // 4. Start the Video Animation Showcase of the site!
+  startSiteShowcase();
+
+  // 5. Show Replay button after reveal completes
   setTimeout(() => {
     if (replayBtn) replayBtn.style.display = 'flex';
   }, 2600);
 }
 
+function startSiteShowcase() {
+  stopSiteShowcase(false);
+  showcaseActive = true;
+  
+  const hud = document.getElementById('showcaseHUD');
+  if (hud) hud.classList.add('active');
+
+  let currentIdx = 0;
+
+  function runStep() {
+    if (!showcaseActive || currentIdx >= showcaseSteps.length) {
+      finishSiteShowcase();
+      return;
+    }
+
+    const step = showcaseSteps[currentIdx];
+    const titleEl = document.getElementById('showcaseSectionTitle');
+    if (titleEl) titleEl.textContent = step.title;
+
+    let targetY = 0;
+    if (step.id) {
+      const el = document.getElementById(step.id);
+      if (el) {
+        const navOffset = 65;
+        const rect = el.getBoundingClientRect();
+        targetY = rect.top + window.pageYOffset - navOffset;
+      }
+    } else if (typeof step.top !== 'undefined') {
+      targetY = step.top;
+    }
+
+    if (step.action) step.action();
+
+    // Smooth cinematic camera pan
+    smoothCameraPan(targetY, 1500, () => {
+      if (!showcaseActive) return;
+      showcaseTimer = setTimeout(() => {
+        currentIdx++;
+        runStep();
+      }, step.duration - 1500);
+    });
+  }
+
+  // Delay step 1 until curtains have fully cleared screen
+  showcaseTimer = setTimeout(runStep, 1200);
+}
+
+function smoothCameraPan(targetY, duration, callback) {
+  const startY = window.pageYOffset;
+  const distance = targetY - startY;
+  const startTime = performance.now();
+
+  function animate(currentTime) {
+    if (!showcaseActive) return;
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    
+    // Smooth cinematic easeInOutCubic
+    const ease = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+    window.scrollTo(0, startY + (distance * ease));
+
+    if (progress < 1) {
+      showcaseAnimFrame = requestAnimationFrame(animate);
+    } else {
+      if (callback) callback();
+    }
+  }
+
+  showcaseAnimFrame = requestAnimationFrame(animate);
+}
+
+function stopSiteShowcase(userInterrupted = true) {
+  showcaseActive = false;
+  if (showcaseTimer) clearTimeout(showcaseTimer);
+  if (showcaseAnimFrame) cancelAnimationFrame(showcaseAnimFrame);
+  const hud = document.getElementById('showcaseHUD');
+  if (hud) hud.classList.remove('active');
+}
+
+function finishSiteShowcase() {
+  stopSiteShowcase(false);
+  const hud = document.getElementById('showcaseHUD');
+  const titleEl = document.getElementById('showcaseSectionTitle');
+  if (hud && titleEl) {
+    titleEl.textContent = '✨ Welcome to KCS Society ✨';
+    hud.classList.add('active');
+    triggerGrandCelebrationBurst();
+    setTimeout(() => {
+      hud.classList.remove('active');
+    }, 2800);
+  }
+}
+
+// User can interrupt anytime by scrolling or touching
+window.addEventListener('wheel', () => { if (showcaseActive) stopSiteShowcase(true); }, { passive: true });
+window.addEventListener('touchmove', () => { if (showcaseActive) stopSiteShowcase(true); }, { passive: true });
+
 function resetInauguration() {
+  stopSiteShowcase(false);
   inaugurationOpened = false;
   document.body.classList.add('curtain-locked');
   window.scrollTo({ top: 0, behavior: 'instant' });
