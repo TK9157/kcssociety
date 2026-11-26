@@ -1700,7 +1700,8 @@ function stopWebAudioSynth() {
 function playBgMusic() {
   var audio = getBgMusic();
   if (!audio) return;
-  audio.volume = 0.55;
+  if (!audio.src) audio.src = 'background_music.mp3';
+  audio.volume = 0.65;
   var p = audio.play();
   if (p !== undefined) {
     p.then(function() {
@@ -1709,12 +1710,12 @@ function playBgMusic() {
       updateMusicUI();
       hideMusicPrompt();
     }).catch(function(e) {
-      if (musicUserEnabled && bgMusicUnlocked) {
+      console.warn('Audio element play error, starting synth fallback:', e);
+      if (musicUserEnabled) {
+        bgMusicUnlocked = true;
         startWebAudioSynth();
         updateMusicUI();
         hideMusicPrompt();
-      } else {
-        showMusicPrompt();
       }
     });
   } else {
@@ -1812,6 +1813,7 @@ function hideMusicPrompt() {
 
 function startBackgroundMusicOnInteraction() {
   if (bgMusicUnlocked || !musicUserEnabled || musicYtPaused) return;
+  bgMusicUnlocked = true;
   playBgMusic();
 }
 
@@ -1939,8 +1941,10 @@ let mal = false;
   </script>
 
   <!-- Background Music -->
-  <audio id="bgMusic" loop preload="auto" playsinline webkit-playsinline src="music.mp3">
+  <audio id="bgMusic" loop preload="auto" playsinline webkit-playsinline src="background_music.mp3">
+    <source src="background_music.mp3" type="audio/mpeg">
     <source src="music.mp3" type="audio/mpeg">
+    <source src="background_music.wav" type="audio/wav">
   </audio>
 
   <!-- Autoplay Prompt -->
