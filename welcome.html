@@ -373,7 +373,7 @@
       position: fixed;
       inset: 0;
       pointer-events: none;
-      z-index: 99999;
+      z-index: 999999999;
       overflow: hidden;
       perspective: 800px;
     }
@@ -2029,28 +2029,28 @@
     photos.forEach((p, i) => { const f = document.createElement('figure'); const im = document.createElement('img'); im.src = p.src; im.alt = p.alt; im.loading = 'lazy'; im.onclick = (e) => { openLightbox(p.src, e); }; const c = document.createElement('figcaption'); c.textContent = p.caption; f.append(im, c); grid.append(f) });
 
     /* ===== Festive Flower Pop Overlay ===== */
-    function triggerFlowerBurst(originX, originY) {
-      const existing = document.getElementById('flowerOverlay');
-      if (existing) existing.remove();
+    function triggerFlowerBurst(originX, originY, customCount) {
+      let overlay = document.getElementById('flowerOverlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'flowerOverlay';
+        overlay.className = 'flower-overlay';
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(overlay);
+      }
 
-      const overlay = document.createElement('div');
-      overlay.id = 'flowerOverlay';
-      overlay.className = 'flower-overlay';
-      overlay.setAttribute('aria-hidden', 'true');
-      document.body.appendChild(overlay);
-
-      const flowers = ['🌸', '🌼', '🌺', '💮', '🏵️', '🌷', '✨', '🌻'];
-      const petalColors = ['#f59e0b', '#ef4444', '#ec4899', '#f97316', '#ffffff', '#eab308', '#fb7185'];
+      const flowers = ['🌸', '🌼', '🌺', '💮', '🏵️', '🌷', '✨', '🌻', '💐', '🌹', '⭐'];
+      const petalColors = ['#f59e0b', '#ef4444', '#ec4899', '#f97316', '#ffffff', '#eab308', '#fb7185', '#dc2626', '#ffd700'];
 
       const cx = originX || (window.innerWidth / 2);
       const cy = originY || (window.innerHeight / 2);
-      const count = Math.min(Math.max(Math.floor(window.innerWidth / 20), 45), 70);
+      const count = customCount || Math.min(Math.max(Math.floor(window.innerWidth / 10), 100), 180);
 
       for (let i = 0; i < count; i++) {
         const p = document.createElement('div');
         p.className = 'flower-particle';
 
-        const isSvg = Math.random() > 0.45;
+        const isSvg = Math.random() > 0.4;
         if (isSvg) {
           const color = petalColors[Math.floor(Math.random() * petalColors.length)];
           p.innerHTML = `<svg viewBox="0 0 24 24" width="100%" height="100%" style="fill:${color};filter:drop-shadow(0 2px 5px rgba(0,0,0,0.25));"><path d="M12 2C9.2 2 6.5 6.8 6.5 12s2.7 10 5.5 10 5.5-4.8 5.5-10S14.8 2 12 2z"/></svg>`;
@@ -2061,19 +2061,19 @@
         overlay.appendChild(p);
 
         const angle = Math.random() * Math.PI * 2;
-        const spread = 90 + Math.random() * (Math.min(window.innerWidth, window.innerHeight) * 0.48);
+        const spread = 80 + Math.random() * (Math.min(window.innerWidth, window.innerHeight) * 0.55);
         const popX = Math.cos(angle) * spread;
-        const popY = Math.sin(angle) * spread - (40 + Math.random() * 90);
-        const fallX = popX + (Math.random() - 0.5) * 180;
-        const fallY = popY + 180 + Math.random() * 320;
+        const popY = Math.sin(angle) * spread - (50 + Math.random() * 130);
+        const fallX = popX + (Math.random() - 0.5) * 220;
+        const fallY = popY + 200 + Math.random() * 420;
 
         const rotStart = (Math.random() - 0.5) * 180;
         const rotMid = rotStart + (Math.random() - 0.5) * 450;
         const rotEnd = rotMid + (Math.random() - 0.5) * 720;
 
-        const scalePop = 1.05 + Math.random() * 0.75;
+        const scalePop = 1.1 + Math.random() * 0.8;
         const scaleEnd = scalePop * (0.6 + Math.random() * 0.4);
-        const size = 20 + Math.random() * 26;
+        const size = 20 + Math.random() * 28;
 
         p.style.width = size + 'px';
         p.style.height = size + 'px';
@@ -2081,10 +2081,10 @@
         p.style.left = cx + 'px';
         p.style.top = cy + 'px';
 
-        const delay = Math.random() * 0.12;
-        const duration = 2.4 + Math.random() * 0.5;
+        const delay = Math.random() * 0.18;
+        const duration = 2.8 + Math.random() * 0.8;
 
-        p.animate([
+        const anim = p.animate([
           {
             transform: `translate(-50%, -50%) translate3d(0, 0, 0) scale(0.15) rotate(${rotStart}deg)`,
             opacity: 0,
@@ -2116,13 +2116,14 @@
           easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)',
           fill: 'forwards'
         });
-      }
 
-      setTimeout(() => {
-        if (overlay && overlay.parentNode) {
-          overlay.remove();
-        }
-      }, 2900);
+        anim.onfinish = function () {
+          p.remove();
+          if (overlay && overlay.children.length === 0) {
+            overlay.remove();
+          }
+        };
+      }
     }
 
     function openLightbox(src, evt) {
@@ -2588,10 +2589,12 @@
         }
       } catch (e) { }
 
-      // Celebration burst
-      try {
-        triggerGrandCelebrationBurst();
-      } catch (e) { }
+      // Celebration burst - 2 second delay after ribbon cut & curtain opening
+      setTimeout(function () {
+        try {
+          triggerGrandCelebrationBurst();
+        } catch (e) { }
+      }, 2000);
 
       // Automated website showcase
       try {
@@ -2649,7 +2652,7 @@
         });
       }
 
-      showcaseTimer = setTimeout(runStep, 1200);
+      showcaseTimer = setTimeout(runStep, 3800);
     }
 
     function smoothCameraPan(targetY, duration, callback) {
@@ -2710,6 +2713,8 @@
 
       var overlay = document.getElementById('inaugurationOverlay');
       var replayBtn = document.getElementById('replayInaugurationBtn');
+      var flowerOverlay = document.getElementById('flowerOverlay');
+      if (flowerOverlay) flowerOverlay.remove();
       if (overlay) {
         overlay.classList.remove('opened');
         overlay.style.display = 'flex';
@@ -2765,18 +2770,35 @@
       }
     }, true);
 
-    // Grand Celebration Burst
+    // Grand Celebration Burst - Massive multi-wave screen-wide flower shower
     function triggerGrandCelebrationBurst() {
-      if (typeof triggerFlowerBurst === 'function') {
-        triggerFlowerBurst(window.innerWidth / 2, window.innerHeight / 2);
-        setTimeout(function () {
-          triggerFlowerBurst(window.innerWidth * 0.25, window.innerHeight * 0.4);
-          triggerFlowerBurst(window.innerWidth * 0.75, window.innerHeight * 0.4);
-        }, 450);
-        setTimeout(function () {
-          triggerFlowerBurst(window.innerWidth * 0.5, window.innerHeight * 0.35);
-        }, 950);
-      }
+      if (typeof triggerFlowerBurst !== 'function') return;
+
+      var w = window.innerWidth;
+      var h = window.innerHeight;
+
+      // Wave 1: Immediate massive triple burst (Center + Left + Right) - ~420 flowers
+      triggerFlowerBurst(w * 0.5, h * 0.45, 180);
+      triggerFlowerBurst(w * 0.2, h * 0.55, 120);
+      triggerFlowerBurst(w * 0.8, h * 0.55, 120);
+
+      // Wave 2 (+380ms): High cross-arch cascades (Mid-Left + Mid-Right) - ~260 flowers
+      setTimeout(function () {
+        triggerFlowerBurst(w * 0.35, h * 0.35, 130);
+        triggerFlowerBurst(w * 0.65, h * 0.35, 130);
+      }, 380);
+
+      // Wave 3 (+750ms): Sky rain shower across the top - ~300 flowers
+      setTimeout(function () {
+        triggerFlowerBurst(w * 0.5, h * 0.2, 140);
+        triggerFlowerBurst(w * 0.12, h * 0.25, 80);
+        triggerFlowerBurst(w * 0.88, h * 0.25, 80);
+      }, 750);
+
+      // Wave 4 (+1150ms): Golden sparkles & flower finale - ~120 flowers
+      setTimeout(function () {
+        triggerFlowerBurst(w * 0.5, h * 0.4, 120);
+      }, 1150);
     }
   </script>
 
