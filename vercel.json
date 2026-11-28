@@ -1,12 +1,6 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
-  "rewrites": [
-    {
-      "source": "/((?!.*\\.(?:mp3|wav|ogg|jpg|jpeg|png|gif|webp|svg|ico|css|js|txt|html|json)).*)",
-      "destination": "/welcome.html"
-    }
-  ],
   "headers": [
     {
       "source": "/music.mp3",
