@@ -371,7 +371,7 @@
       align-items: center;
       justify-content: center;
       line-height: 1;
-      filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.2));
+      );
     }
 
     @media(max-width:650px) {
@@ -1555,184 +1555,202 @@
     
 // ===== Background Music & YouTube Sync =====
 // ===== Clean Background Audio (music.mp3 / background_music.mp3) =====
-var bgMusicEl = null;
-var ytPlayer = null;
-var ytPlayerReady = false;
-var musicUserEnabled = true;
-var musicYtPaused = false;
-var bgMusicUnlocked = false;
+    var bgMusicEl = null;
+    var ytPlayer = null;
+    var ytPlayerReady = false;
+    var musicUserEnabled = true;
+    var musicYtPaused = false;
+    var bgMusicUnlocked = false;
+    var audioPlayPromise = null;
 
-function getBgMusic() {
-  if (!bgMusicEl) {
-    bgMusicEl = document.getElementById('bgMusic');
-    if (bgMusicEl) {
-      bgMusicEl.addEventListener('error', function() {
-        if (bgMusicEl.src && bgMusicEl.src.indexOf('background_music.mp3') !== -1) {
-          bgMusicEl.src = 'music.mp3';
-          bgMusicEl.load();
-          if (bgMusicUnlocked && musicUserEnabled && !musicYtPaused) {
-            bgMusicEl.play().catch(function(){});
-          }
+    function getBgMusic() {
+      if (!bgMusicEl) {
+        bgMusicEl = document.getElementById('bgMusic');
+        if (bgMusicEl) {
+          bgMusicEl.addEventListener('error', function () {
+            if (bgMusicEl.src && bgMusicEl.src.indexOf('music.mp3') !== -1 && bgMusicEl.src.indexOf('background_music.mp3') === -1) {
+              bgMusicEl.src = 'background_music.mp3';
+              bgMusicEl.load();
+              if (bgMusicUnlocked && musicUserEnabled && !musicYtPaused) {
+                playBgMusic();
+              }
+            }
+          });
         }
-      });
+      }
+      return bgMusicEl;
     }
-  }
-  return bgMusicEl;
-}
 
-function updateMusicUI() {
-  var widget = document.getElementById('musicWidget');
-  var pill = document.getElementById('musicStatusPill');
-  var emoji = document.getElementById('musicEmoji');
-  if (!widget || !pill) return;
-  var audio = getBgMusic();
-  var isPlaying = (audio && !audio.paused);
-  widget.classList.remove('playing', 'paused', 'yt-playing');
-  if (musicYtPaused) {
-    widget.classList.add('yt-playing');
-    pill.setAttribute('data-en', 'VIDEO'); pill.setAttribute('data-ml', 'VIDEO');
-    pill.textContent = 'VIDEO';
-    if (emoji) emoji.textContent = String.fromCodePoint(0x1F4FA);
-  } else if (isPlaying) {
-    widget.classList.add('playing');
-    pill.setAttribute('data-en', 'ON'); pill.setAttribute('data-ml', 'ഓൺ');
-    pill.textContent = (typeof mal !== 'undefined' && mal) ? 'ഓൺ' : 'ON';
-    if (emoji) emoji.textContent = String.fromCodePoint(0x1F3B5);
-  } else {
-    widget.classList.add('paused');
-    pill.setAttribute('data-en', 'OFF'); pill.setAttribute('data-ml', 'ഓഫ്');
-    pill.textContent = (typeof mal !== 'undefined' && mal) ? 'ഓഫ്' : 'OFF';
-    if (emoji) emoji.textContent = String.fromCodePoint(0x1F507);
-  }
-}
-
-function playBgMusic() {
-  var audio = getBgMusic();
-  if (!audio) return;
-  audio.volume = 0.65;
-  var p = audio.play();
-  if (p !== undefined) {
-    p.then(function() {
-      bgMusicUnlocked = true;
-      updateMusicUI();
-      hideMusicPrompt();
-    }).catch(function(e) {
-      console.warn('Audio play error:', e);
-      showMusicPrompt();
-    });
-  } else {
-    updateMusicUI();
-  }
-}
-
-function pauseBgMusic() {
-  var audio = getBgMusic();
-  if (audio && !audio.paused) audio.pause();
-  updateMusicUI();
-}
-
-function toggleBackgroundMusic() {
-  if (musicYtPaused) return;
-  musicUserEnabled = !musicUserEnabled;
-  bgMusicUnlocked = true;
-  if (musicUserEnabled) {
-    playBgMusic();
-  } else {
-    pauseBgMusic();
-  }
-  updateMusicUI();
-}
-
-function isYoutubeAudible() {
-  if (ytPlayerReady && ytPlayer) {
-    try {
-      var state = ytPlayer.getPlayerState();
-      var muted = ytPlayer.isMuted();
-      var volume = ytPlayer.getVolume();
-      return (state === 1 && !muted && volume > 0);
-    } catch(e) {}
-  }
-  return false;
-}
-
-function syncAudioWithYouTube() {
-  if (!musicUserEnabled) return;
-  var audible = isYoutubeAudible();
-  if (audible && !musicYtPaused) {
-    musicYtPaused = true; pauseBgMusic(); updateMusicUI();
-  } else if (!audible && musicYtPaused) {
-    musicYtPaused = false; playBgMusic(); updateMusicUI();
-  }
-}
-
-window.onYouTubeIframeAPIReady = function() {
-  var iframeEl = document.getElementById('kcsYoutubePlayer');
-  if (!iframeEl) return;
-  ytPlayer = new YT.Player('kcsYoutubePlayer', {
-    events: {
-      'onReady': function(e) { ytPlayerReady = true; },
-      'onStateChange': function(e) { setTimeout(syncAudioWithYouTube, 300); }
-    }
-  });
-};
-
-window.addEventListener('message', function(evt) {
-  try {
-    var data = JSON.parse(evt.data);
-    if (data && data.event === 'infoDelivery' && data.info) {
-      if (typeof data.info.muted !== 'undefined' || typeof data.info.playerState !== 'undefined') {
-        setTimeout(syncAudioWithYouTube, 200);
+    function updateMusicUI() {
+      var widget = document.getElementById('musicWidget');
+      var pill = document.getElementById('musicStatusPill');
+      var emoji = document.getElementById('musicEmoji');
+      if (!widget || !pill) return;
+      var audio = getBgMusic();
+      var isPlaying = (audio && !audio.paused);
+      widget.classList.remove('playing', 'paused', 'yt-playing');
+      if (musicYtPaused) {
+        widget.classList.add('yt-playing');
+        pill.setAttribute('data-en', 'VIDEO'); pill.setAttribute('data-ml', 'VIDEO');
+        pill.textContent = 'VIDEO';
+        if (emoji) emoji.textContent = String.fromCodePoint(0x1F4FA);
+      } else if (isPlaying) {
+        widget.classList.add('playing');
+        pill.setAttribute('data-en', 'ON'); pill.setAttribute('data-ml', 'ഓൺ');
+        pill.textContent = (typeof mal !== 'undefined' && mal) ? 'ഓൺ' : 'ON';
+        if (emoji) emoji.textContent = String.fromCodePoint(0x1F3B5);
+      } else {
+        widget.classList.add('paused');
+        pill.setAttribute('data-en', 'OFF'); pill.setAttribute('data-ml', 'ഓഫ്');
+        pill.textContent = (typeof mal !== 'undefined' && mal) ? 'ഓഫ്' : 'OFF';
+        if (emoji) emoji.textContent = String.fromCodePoint(0x1F507);
       }
     }
-  } catch(e) {}
-});
 
-setInterval(syncAudioWithYouTube, 500);
-
-function showMusicPrompt() {
-  var p = document.getElementById('musicPrompt');
-  if (p) p.style.display = 'block';
-}
-function hideMusicPrompt() {
-  var p = document.getElementById('musicPrompt');
-  if (p) p.style.display = 'none';
-}
-
-function startBackgroundMusicOnInteraction() {
-  if (bgMusicUnlocked || !musicUserEnabled || musicYtPaused) return;
-  playBgMusic();
-}
-
-(function() {
-  // Listen for user interaction to start MP3 audio
-  var evts = ['click', 'touchstart', 'pointerdown', 'keydown'];
-  function onUserTouch() {
-    var audio = getBgMusic();
-    if (!audio) return;
-    if (audio.paused && musicUserEnabled && !musicYtPaused) {
+    function playBgMusic() {
+      var audio = getBgMusic();
+      if (!audio) return;
       audio.volume = 0.65;
-      var p = audio.play();
-      if (p !== undefined) {
-        p.then(function() {
-          bgMusicUnlocked = true;
+      try {
+        var p = audio.play();
+        if (p !== undefined) {
+          audioPlayPromise = p;
+          p.then(function () {
+            audioPlayPromise = null;
+            bgMusicUnlocked = true;
+            updateMusicUI();
+            hideMusicPrompt();
+          }).catch(function (e) {
+            audioPlayPromise = null;
+            if (e && e.name === 'AbortError') {
+              updateMusicUI();
+              return;
+            }
+            console.warn('Audio play error:', e);
+            if (musicUserEnabled && !musicYtPaused) {
+              showMusicPrompt();
+            }
+          });
+        } else {
           updateMusicUI();
-          hideMusicPrompt();
-          evts.forEach(function(ev) {
+        }
+      } catch (err) {
+        console.warn('Audio play exception:', err);
+      }
+    }
+
+    function pauseBgMusic() {
+      var audio = getBgMusic();
+      if (!audio) return;
+      hideMusicPrompt();
+      if (audioPlayPromise) {
+        audioPlayPromise.then(function () {
+          if (!musicUserEnabled || musicYtPaused) {
+            audio.pause();
+          }
+          updateMusicUI();
+        }).catch(function () {
+          audio.pause();
+          updateMusicUI();
+        });
+      } else {
+        if (!audio.paused) audio.pause();
+        updateMusicUI();
+      }
+    }
+
+    function toggleBackgroundMusic() {
+      if (musicYtPaused) return;
+      musicUserEnabled = !musicUserEnabled;
+      bgMusicUnlocked = true;
+      if (musicUserEnabled) {
+        playBgMusic();
+      } else {
+        pauseBgMusic();
+      }
+      updateMusicUI();
+    }
+
+    function isYoutubeAudible() {
+      if (ytPlayerReady && ytPlayer) {
+        try {
+          var state = ytPlayer.getPlayerState();
+          var muted = ytPlayer.isMuted();
+          var volume = ytPlayer.getVolume();
+          return (state === 1 && !muted && volume > 0);
+        } catch (e) { }
+      }
+      return false;
+    }
+
+    function syncAudioWithYouTube() {
+      if (!musicUserEnabled) return;
+      var audible = isYoutubeAudible();
+      if (audible && !musicYtPaused) {
+        musicYtPaused = true; pauseBgMusic(); updateMusicUI();
+      } else if (!audible && musicYtPaused) {
+        musicYtPaused = false; playBgMusic(); updateMusicUI();
+      }
+    }
+
+    window.onYouTubeIframeAPIReady = function () {
+      var iframeEl = document.getElementById('kcsYoutubePlayer');
+      if (!iframeEl) return;
+      ytPlayer = new YT.Player('kcsYoutubePlayer', {
+        events: {
+          'onReady': function (e) { ytPlayerReady = true; },
+          'onStateChange': function (e) { setTimeout(syncAudioWithYouTube, 300); }
+        }
+      });
+    };
+
+    window.addEventListener('message', function (evt) {
+      try {
+        var data = JSON.parse(evt.data);
+        if (data && data.event === 'infoDelivery' && data.info) {
+          if (typeof data.info.muted !== 'undefined' || typeof data.info.playerState !== 'undefined') {
+            setTimeout(syncAudioWithYouTube, 200);
+          }
+        }
+      } catch (e) { }
+    });
+
+    setInterval(syncAudioWithYouTube, 600);
+
+    function showMusicPrompt() {
+      var p = document.getElementById('musicPrompt');
+      if (p) p.style.display = 'block';
+    }
+    function hideMusicPrompt() {
+      var p = document.getElementById('musicPrompt');
+      if (p) p.style.display = 'none';
+    }
+
+    function startBackgroundMusicOnInteraction() {
+      if (bgMusicUnlocked || !musicUserEnabled || musicYtPaused) return;
+      playBgMusic();
+    }
+
+    (function () {
+      var evts = ['click', 'touchstart', 'pointerdown', 'keydown'];
+      function onUserTouch(e) {
+        if (e && e.target && e.target.closest('#musicWidget')) return;
+        var audio = getBgMusic();
+        if (!audio) return;
+        if (audio.paused && musicUserEnabled && !musicYtPaused) {
+          playBgMusic();
+          evts.forEach(function (ev) {
             window.removeEventListener(ev, onUserTouch, true);
             document.removeEventListener(ev, onUserTouch, true);
           });
-        }).catch(function(err) {
-          console.warn('Audio waiting for user gesture:', err);
-        });
+        }
       }
-    }
-  }
-  evts.forEach(function(ev) {
-    window.addEventListener(ev, onUserTouch, { capture: true, passive: true });
-    document.addEventListener(ev, onUserTouch, { capture: true, passive: true });
-  });
-})();
-// ===== End Background Music =====
+      evts.forEach(function (ev) {
+        window.addEventListener(ev, onUserTouch, { capture: true, passive: true });
+        document.addEventListener(ev, onUserTouch, { capture: true, passive: true });
+      });
+    })();
+    // ===== End Background Music ===== 
 let mal = false;
     function toggleLang() { mal = !mal; document.documentElement.lang = mal ? 'ml' : 'en'; document.querySelectorAll('[data-en]').forEach(el => el.textContent = mal ? el.dataset.ml : el.dataset.en); document.getElementById('langBtn').textContent = mal ? 'English' : 'മലയാളം' }
     document.getElementById('year').textContent = new Date().getFullYear();
@@ -1755,24 +1773,20 @@ let mal = false;
       document.body.appendChild(cursorTrail);
 
       const trailFlowers = ['🌸', '🌼', '🌺', '💮', '✨', '🏵️'];
-      const trailColors = ['#f43f5e', '#fbbf24', '#f59e0b', '#ec4899', '#ffffff', '#eab308'];
       let lastTime = 0;
       let lastX = 0;
       let lastY = 0;
 
       function spawnPetal(x, y, isClick) {
-        const petal = document.createElement('span');
-        const size = isClick ? (14 + Math.random() * 10) : (10 + Math.random() * 8);
-        const useSvg = Math.random() > 0.45;
-
-        if (useSvg) {
-          const col = trailColors[Math.floor(Math.random() * trailColors.length)];
-          petal.innerHTML = `<svg viewBox="0 0 24 24" width="${size}" height="${size}" style="fill:${col};filter:drop-shadow(0 1px 2px rgba(0,0,0,0.2));"><path d="M12 2C9.5 2 7 6.5 7 12s2.5 10 5 10 5-4.5 5-10-2.5-10-5-10z"/></svg>`;
-        } else {
-          petal.textContent = trailFlowers[Math.floor(Math.random() * trailFlowers.length)];
-          petal.style.fontSize = size + 'px';
+        if (!cursorTrail) return;
+        if (cursorTrail.children.length > 15) {
+          cursorTrail.firstElementChild.remove();
         }
 
+        const petal = document.createElement('span');
+        const size = isClick ? (14 + Math.random() * 8) : (10 + Math.random() * 6);
+        petal.textContent = trailFlowers[Math.floor(Math.random() * trailFlowers.length)];
+        petal.style.fontSize = size + 'px';
         petal.style.position = 'absolute';
         petal.style.left = x + 'px';
         petal.style.top = y + 'px';
@@ -1781,34 +1795,28 @@ let mal = false;
         petal.style.lineHeight = '1';
         cursorTrail.appendChild(petal);
 
-        const driftX = (Math.random() - 0.5) * (isClick ? 50 : 25);
-        const driftY = (isClick ? (Math.random() - 0.5) * 50 : 20 + Math.random() * 30);
-        const rotate = (Math.random() - 0.5) * 360;
+        const driftX = (Math.random() - 0.5) * (isClick ? 40 : 20);
+        const driftY = (isClick ? (Math.random() - 0.5) * 40 : 16 + Math.random() * 22);
+        const rotate = (Math.random() - 0.5) * 200;
 
         petal.animate([
-          {
-            transform: 'translate(-50%, -50%) scale(1) rotate(0deg)',
-            opacity: isClick ? 1 : 0.85
-          },
-          {
-            transform: `translate(calc(-50% + ${driftX}px), calc(-50% + ${driftY}px)) scale(0.25) rotate(${rotate}deg)`,
-            opacity: 0
-          }
+          { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)', opacity: isClick ? 1 : 0.85 },
+          { transform: `translate(calc(-50% + ${driftX}px), calc(-50% + ${driftY}px)) scale(0.2) rotate(${rotate}deg)`, opacity: 0 }
         ], {
-          duration: isClick ? 750 : 600,
+          duration: isClick ? 650 : 500,
           easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
           fill: 'forwards'
         });
 
         setTimeout(() => {
           petal.remove();
-        }, isClick ? 800 : 650);
+        }, isClick ? 700 : 550);
       }
 
-      window.addEventListener('mousemove', function(e) {
+      window.addEventListener('mousemove', function (e) {
         const now = Date.now();
         const dist = Math.hypot(e.clientX - lastX, e.clientY - lastY);
-        if (now - lastTime > 40 && dist > 10) {
+        if (now - lastTime > 60 && dist > 15) {
           lastTime = now;
           lastX = e.clientX;
           lastY = e.clientY;
@@ -1816,8 +1824,8 @@ let mal = false;
         }
       }, { passive: true });
 
-      window.addEventListener('click', function(e) {
-        for (let i = 0; i < 5; i++) {
+      window.addEventListener('click', function (e) {
+        for (let i = 0; i < 3; i++) {
           spawnPetal(e.clientX, e.clientY, true);
         }
       }, { passive: true });
@@ -1825,9 +1833,9 @@ let mal = false;
   </script>
 
   <!-- Background Music -->
-  <audio id="bgMusic" loop preload="auto" playsinline webkit-playsinline src="background_music.mp3">
-    <source src="background_music.mp3" type="audio/mpeg">
+  <audio id="bgMusic" loop preload="auto" playsinline webkit-playsinline src="music.mp3">
     <source src="music.mp3" type="audio/mpeg">
+    <source src="background_music.mp3" type="audio/mpeg">
   </audio>
 
   <!-- Autoplay Prompt -->

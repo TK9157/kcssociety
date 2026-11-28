@@ -387,7 +387,6 @@
       align-items: center;
       justify-content: center;
       line-height: 1;
-      filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.2));
     }
 
     @media(max-width:650px) {
@@ -2040,40 +2039,30 @@
       }
 
       const flowers = ['🌸', '🌼', '🌺', '💮', '🏵️', '🌷', '✨', '🌻', '💐', '🌹', '⭐'];
-      const petalColors = ['#f59e0b', '#ef4444', '#ec4899', '#f97316', '#ffffff', '#eab308', '#fb7185', '#dc2626', '#ffd700'];
-
       const cx = originX || (window.innerWidth / 2);
       const cy = originY || (window.innerHeight / 2);
-      const count = customCount || Math.min(Math.max(Math.floor(window.innerWidth / 10), 100), 180);
+      const count = customCount || Math.min(Math.max(Math.floor(window.innerWidth / 28), 25), 50);
 
       for (let i = 0; i < count; i++) {
         const p = document.createElement('div');
         p.className = 'flower-particle';
-
-        const isSvg = Math.random() > 0.4;
-        if (isSvg) {
-          const color = petalColors[Math.floor(Math.random() * petalColors.length)];
-          p.innerHTML = `<svg viewBox="0 0 24 24" width="100%" height="100%" style="fill:${color};filter:drop-shadow(0 2px 5px rgba(0,0,0,0.25));"><path d="M12 2C9.2 2 6.5 6.8 6.5 12s2.7 10 5.5 10 5.5-4.8 5.5-10S14.8 2 12 2z"/></svg>`;
-        } else {
-          p.textContent = flowers[Math.floor(Math.random() * flowers.length)];
-        }
-
+        p.textContent = flowers[Math.floor(Math.random() * flowers.length)];
         overlay.appendChild(p);
 
         const angle = Math.random() * Math.PI * 2;
-        const spread = 80 + Math.random() * (Math.min(window.innerWidth, window.innerHeight) * 0.55);
+        const spread = 70 + Math.random() * (Math.min(window.innerWidth, window.innerHeight) * 0.45);
         const popX = Math.cos(angle) * spread;
-        const popY = Math.sin(angle) * spread - (50 + Math.random() * 130);
-        const fallX = popX + (Math.random() - 0.5) * 220;
-        const fallY = popY + 200 + Math.random() * 420;
+        const popY = Math.sin(angle) * spread - (40 + Math.random() * 100);
+        const fallX = popX + (Math.random() - 0.5) * 160;
+        const fallY = popY + 160 + Math.random() * 300;
 
         const rotStart = (Math.random() - 0.5) * 180;
-        const rotMid = rotStart + (Math.random() - 0.5) * 450;
-        const rotEnd = rotMid + (Math.random() - 0.5) * 720;
+        const rotMid = rotStart + (Math.random() - 0.5) * 360;
+        const rotEnd = rotMid + (Math.random() - 0.5) * 540;
 
-        const scalePop = 1.1 + Math.random() * 0.8;
-        const scaleEnd = scalePop * (0.6 + Math.random() * 0.4);
-        const size = 20 + Math.random() * 28;
+        const scalePop = 1.05 + Math.random() * 0.5;
+        const scaleEnd = scalePop * (0.55 + Math.random() * 0.35);
+        const size = 18 + Math.random() * 22;
 
         p.style.width = size + 'px';
         p.style.height = size + 'px';
@@ -2081,29 +2070,29 @@
         p.style.left = cx + 'px';
         p.style.top = cy + 'px';
 
-        const delay = Math.random() * 0.18;
-        const duration = 2.8 + Math.random() * 0.8;
+        const delay = Math.random() * 0.12;
+        const duration = 2.2 + Math.random() * 0.6;
 
         const anim = p.animate([
           {
-            transform: `translate(-50%, -50%) translate3d(0, 0, 0) scale(0.15) rotate(${rotStart}deg)`,
+            transform: `translate(-50%, -50%) translate3d(0, 0, 0) scale(0.2) rotate(${rotStart}deg)`,
             opacity: 0,
             offset: 0
           },
           {
-            transform: `translate(-50%, -50%) translate3d(${popX * 0.5}px, ${popY * 0.5}px, 0) scale(${scalePop}) rotate(${rotStart + 60}deg)`,
+            transform: `translate(-50%, -50%) translate3d(${popX * 0.5}px, ${popY * 0.5}px, 0) scale(${scalePop}) rotate(${rotStart + 45}deg)`,
             opacity: 1,
-            offset: 0.14
+            offset: 0.15
           },
           {
             transform: `translate(-50%, -50%) translate3d(${popX}px, ${popY}px, 0) scale(${scalePop}) rotate(${rotMid}deg)`,
             opacity: 1,
-            offset: 0.35
+            offset: 0.38
           },
           {
-            transform: `translate(-50%, -50%) translate3d(${fallX * 0.8}px, ${fallY * 0.65}px, 0) scale(${scalePop * 0.9}) rotate(${rotMid + 180}deg)`,
-            opacity: 0.95,
-            offset: 0.72
+            transform: `translate(-50%, -50%) translate3d(${fallX * 0.8}px, ${fallY * 0.65}px, 0) scale(${scalePop * 0.85}) rotate(${rotMid + 120}deg)`,
+            opacity: 0.9,
+            offset: 0.75
           },
           {
             transform: `translate(-50%, -50%) translate3d(${fallX}px, ${fallY}px, 0) scale(${scaleEnd}) rotate(${rotEnd}deg)`,
@@ -2119,11 +2108,14 @@
 
         anim.onfinish = function () {
           p.remove();
-          if (overlay && overlay.children.length === 0) {
-            overlay.remove();
-          }
         };
       }
+
+      setTimeout(function () {
+        if (overlay && overlay.children.length === 0) {
+          overlay.remove();
+        }
+      }, 3500);
     }
 
     function openLightbox(src, evt) {
@@ -2148,15 +2140,8 @@
     (function initLightboxFlowerWatcher() {
       const lb = document.getElementById('lightbox');
       if (!lb) return;
-      let lastBurst = 0;
       const observer = new MutationObserver(() => {
-        if (lb.style.display === 'flex') {
-          const now = Date.now();
-          if (now - lastBurst > 1200) {
-            lastBurst = now;
-            triggerFlowerBurst();
-          }
-        } else {
+        if (lb.style.display !== 'flex') {
           const ov = document.getElementById('flowerOverlay');
           if (ov) ov.remove();
         }
@@ -2217,17 +2202,18 @@
     var musicUserEnabled = true;
     var musicYtPaused = false;
     var bgMusicUnlocked = false;
+    var audioPlayPromise = null;
 
     function getBgMusic() {
       if (!bgMusicEl) {
         bgMusicEl = document.getElementById('bgMusic');
         if (bgMusicEl) {
           bgMusicEl.addEventListener('error', function () {
-            if (bgMusicEl.src && bgMusicEl.src.indexOf('background_music.mp3') !== -1) {
-              bgMusicEl.src = 'music.mp3';
+            if (bgMusicEl.src && bgMusicEl.src.indexOf('music.mp3') !== -1 && bgMusicEl.src.indexOf('background_music.mp3') === -1) {
+              bgMusicEl.src = 'background_music.mp3';
               bgMusicEl.load();
               if (bgMusicUnlocked && musicUserEnabled && !musicYtPaused) {
-                bgMusicEl.play().catch(function () { });
+                playBgMusic();
               }
             }
           });
@@ -2266,25 +2252,52 @@
       var audio = getBgMusic();
       if (!audio) return;
       audio.volume = 0.65;
-      var p = audio.play();
-      if (p !== undefined) {
-        p.then(function () {
-          bgMusicUnlocked = true;
+      try {
+        var p = audio.play();
+        if (p !== undefined) {
+          audioPlayPromise = p;
+          p.then(function () {
+            audioPlayPromise = null;
+            bgMusicUnlocked = true;
+            updateMusicUI();
+            hideMusicPrompt();
+          }).catch(function (e) {
+            audioPlayPromise = null;
+            if (e && e.name === 'AbortError') {
+              updateMusicUI();
+              return;
+            }
+            console.warn('Audio play error:', e);
+            if (musicUserEnabled && !musicYtPaused) {
+              showMusicPrompt();
+            }
+          });
+        } else {
           updateMusicUI();
-          hideMusicPrompt();
-        }).catch(function (e) {
-          console.warn('Audio play error:', e);
-          showMusicPrompt();
-        });
-      } else {
-        updateMusicUI();
+        }
+      } catch (err) {
+        console.warn('Audio play exception:', err);
       }
     }
 
     function pauseBgMusic() {
       var audio = getBgMusic();
-      if (audio && !audio.paused) audio.pause();
-      updateMusicUI();
+      if (!audio) return;
+      hideMusicPrompt();
+      if (audioPlayPromise) {
+        audioPlayPromise.then(function () {
+          if (!musicUserEnabled || musicYtPaused) {
+            audio.pause();
+          }
+          updateMusicUI();
+        }).catch(function () {
+          audio.pause();
+          updateMusicUI();
+        });
+      } else {
+        if (!audio.paused) audio.pause();
+        updateMusicUI();
+      }
     }
 
     function toggleBackgroundMusic() {
@@ -2343,7 +2356,7 @@
       } catch (e) { }
     });
 
-    setInterval(syncAudioWithYouTube, 500);
+    setInterval(syncAudioWithYouTube, 600);
 
     function showMusicPrompt() {
       var p = document.getElementById('musicPrompt');
@@ -2360,27 +2373,18 @@
     }
 
     (function () {
-      // Listen for user interaction to start MP3 audio
       var evts = ['click', 'touchstart', 'pointerdown', 'keydown'];
-      function onUserTouch() {
+      function onUserTouch(e) {
+        // Do not auto-trigger if clicking music widget itself (widget has its own onclick)
+        if (e && e.target && e.target.closest('#musicWidget')) return;
         var audio = getBgMusic();
         if (!audio) return;
         if (audio.paused && musicUserEnabled && !musicYtPaused) {
-          audio.volume = 0.65;
-          var p = audio.play();
-          if (p !== undefined) {
-            p.then(function () {
-              bgMusicUnlocked = true;
-              updateMusicUI();
-              hideMusicPrompt();
-              evts.forEach(function (ev) {
-                window.removeEventListener(ev, onUserTouch, true);
-                document.removeEventListener(ev, onUserTouch, true);
-              });
-            }).catch(function (err) {
-              console.warn('Audio waiting for user gesture:', err);
-            });
-          }
+          playBgMusic();
+          evts.forEach(function (ev) {
+            window.removeEventListener(ev, onUserTouch, true);
+            document.removeEventListener(ev, onUserTouch, true);
+          });
         }
       }
       evts.forEach(function (ev) {
@@ -2388,7 +2392,7 @@
         document.addEventListener(ev, onUserTouch, { capture: true, passive: true });
       });
     })();
-    // ===== End Background Music =====
+    // ===== End Background Music ===== 
     let mal = false;
     function toggleLang() { mal = !mal; document.documentElement.lang = mal ? 'ml' : 'en'; document.querySelectorAll('[data-en]').forEach(el => el.textContent = mal ? el.dataset.ml : el.dataset.en); document.getElementById('langBtn').textContent = mal ? 'English' : 'മലയാളം' }
     document.getElementById('year').textContent = new Date().getFullYear();
@@ -2411,24 +2415,21 @@
       document.body.appendChild(cursorTrail);
 
       const trailFlowers = ['🌸', '🌼', '🌺', '💮', '✨', '🏵️'];
-      const trailColors = ['#f43f5e', '#fbbf24', '#f59e0b', '#ec4899', '#ffffff', '#eab308'];
       let lastTime = 0;
       let lastX = 0;
       let lastY = 0;
 
       function spawnPetal(x, y, isClick) {
-        const petal = document.createElement('span');
-        const size = isClick ? (14 + Math.random() * 10) : (10 + Math.random() * 8);
-        const useSvg = Math.random() > 0.45;
-
-        if (useSvg) {
-          const col = trailColors[Math.floor(Math.random() * trailColors.length)];
-          petal.innerHTML = `<svg viewBox="0 0 24 24" width="${size}" height="${size}" style="fill:${col};filter:drop-shadow(0 1px 2px rgba(0,0,0,0.2));"><path d="M12 2C9.5 2 7 6.5 7 12s2.5 10 5 10 5-4.5 5-10-2.5-10-5-10z"/></svg>`;
-        } else {
-          petal.textContent = trailFlowers[Math.floor(Math.random() * trailFlowers.length)];
-          petal.style.fontSize = size + 'px';
+        if (!cursorTrail) return;
+        // Cap active petals in DOM to max 15 to eliminate frame drops
+        if (cursorTrail.children.length > 15) {
+          cursorTrail.firstElementChild.remove();
         }
 
+        const petal = document.createElement('span');
+        const size = isClick ? (14 + Math.random() * 8) : (10 + Math.random() * 6);
+        petal.textContent = trailFlowers[Math.floor(Math.random() * trailFlowers.length)];
+        petal.style.fontSize = size + 'px';
         petal.style.position = 'absolute';
         petal.style.left = x + 'px';
         petal.style.top = y + 'px';
@@ -2437,34 +2438,28 @@
         petal.style.lineHeight = '1';
         cursorTrail.appendChild(petal);
 
-        const driftX = (Math.random() - 0.5) * (isClick ? 50 : 25);
-        const driftY = (isClick ? (Math.random() - 0.5) * 50 : 20 + Math.random() * 30);
-        const rotate = (Math.random() - 0.5) * 360;
+        const driftX = (Math.random() - 0.5) * (isClick ? 40 : 20);
+        const driftY = (isClick ? (Math.random() - 0.5) * 40 : 16 + Math.random() * 22);
+        const rotate = (Math.random() - 0.5) * 200;
 
         petal.animate([
-          {
-            transform: 'translate(-50%, -50%) scale(1) rotate(0deg)',
-            opacity: isClick ? 1 : 0.85
-          },
-          {
-            transform: `translate(calc(-50% + ${driftX}px), calc(-50% + ${driftY}px)) scale(0.25) rotate(${rotate}deg)`,
-            opacity: 0
-          }
+          { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)', opacity: isClick ? 1 : 0.85 },
+          { transform: `translate(calc(-50% + ${driftX}px), calc(-50% + ${driftY}px)) scale(0.2) rotate(${rotate}deg)`, opacity: 0 }
         ], {
-          duration: isClick ? 750 : 600,
+          duration: isClick ? 650 : 500,
           easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
           fill: 'forwards'
         });
 
         setTimeout(() => {
           petal.remove();
-        }, isClick ? 800 : 650);
+        }, isClick ? 700 : 550);
       }
 
       window.addEventListener('mousemove', function (e) {
         const now = Date.now();
         const dist = Math.hypot(e.clientX - lastX, e.clientY - lastY);
-        if (now - lastTime > 40 && dist > 10) {
+        if (now - lastTime > 60 && dist > 15) {
           lastTime = now;
           lastX = e.clientX;
           lastY = e.clientY;
@@ -2473,7 +2468,7 @@
       }, { passive: true });
 
       window.addEventListener('click', function (e) {
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 3; i++) {
           spawnPetal(e.clientX, e.clientY, true);
         }
       }, { passive: true });
@@ -2481,9 +2476,9 @@
   </script>
 
   <!-- Background Music -->
-  <audio id="bgMusic" loop preload="auto" playsinline webkit-playsinline src="background_music.mp3">
-    <source src="background_music.mp3" type="audio/mpeg">
+  <audio id="bgMusic" loop preload="auto" playsinline webkit-playsinline src="music.mp3">
     <source src="music.mp3" type="audio/mpeg">
+    <source src="background_music.mp3" type="audio/mpeg">
   </audio>
 
   <!-- Autoplay Prompt -->
@@ -2520,7 +2515,7 @@
 
     var showcaseSteps = [
       { id: 'home', title: 'KCS Society Banner · സ്വാഗതം', duration: 3400 },
-      { id: 'events', title: 'Event Highlights · കുടുംബസംഗമം 2026', duration: 4200, action: function () { if (typeof nextSlide === 'function') nextSlide(); } },
+      { id: 'events', title: 'Event Highlights · കുടുംബസംഗമം 2026', duration: 4200, action: function () { if (typeof changeSlide === 'function') changeSlide(1); } },
       { id: 'about', title: 'About Society · സൊസൈറ്റിയെക്കുറിച്ച്', duration: 3800 },
       { id: 'committee', title: 'Office Bearers · ഭാരവാഹികൾ (A. Murugan & Team)', duration: 4800 },
       { id: 'gallery', title: 'Photo Gallery · ഫോട്ടോ ഗാലറി', duration: 3800 },
@@ -2770,35 +2765,22 @@
       }
     }, true);
 
-    // Grand Celebration Burst - Massive multi-wave screen-wide flower shower
+    // Grand Celebration Burst - Crisp, high-performance festive flower shower (~140 particles, 60fps)
     function triggerGrandCelebrationBurst() {
       if (typeof triggerFlowerBurst !== 'function') return;
-
       var w = window.innerWidth;
       var h = window.innerHeight;
 
-      // Wave 1: Immediate massive triple burst (Center + Left + Right) - ~420 flowers
-      triggerFlowerBurst(w * 0.5, h * 0.45, 180);
-      triggerFlowerBurst(w * 0.2, h * 0.55, 120);
-      triggerFlowerBurst(w * 0.8, h * 0.55, 120);
+      // Wave 1: Immediate screen-wide burst (~100 flowers)
+      triggerFlowerBurst(w * 0.5, h * 0.45, 50);
+      triggerFlowerBurst(w * 0.22, h * 0.55, 25);
+      triggerFlowerBurst(w * 0.78, h * 0.55, 25);
 
-      // Wave 2 (+380ms): High cross-arch cascades (Mid-Left + Mid-Right) - ~260 flowers
+      // Wave 2 (+450ms): Festive cascade (~40 flowers)
       setTimeout(function () {
-        triggerFlowerBurst(w * 0.35, h * 0.35, 130);
-        triggerFlowerBurst(w * 0.65, h * 0.35, 130);
-      }, 380);
-
-      // Wave 3 (+750ms): Sky rain shower across the top - ~300 flowers
-      setTimeout(function () {
-        triggerFlowerBurst(w * 0.5, h * 0.2, 140);
-        triggerFlowerBurst(w * 0.12, h * 0.25, 80);
-        triggerFlowerBurst(w * 0.88, h * 0.25, 80);
-      }, 750);
-
-      // Wave 4 (+1150ms): Golden sparkles & flower finale - ~120 flowers
-      setTimeout(function () {
-        triggerFlowerBurst(w * 0.5, h * 0.4, 120);
-      }, 1150);
+        triggerFlowerBurst(w * 0.38, h * 0.35, 20);
+        triggerFlowerBurst(w * 0.62, h * 0.35, 20);
+      }, 450);
     }
   </script>
 
